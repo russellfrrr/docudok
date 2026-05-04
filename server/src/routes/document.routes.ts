@@ -1,0 +1,20 @@
+import { Router } from 'express';
+import { authMiddleware } from '../middleware/auth.middleware';
+import { upload } from '../middleware/upload.middleware';
+import {
+  deleteDocument,
+  getDocumentById,
+  getDocuments,
+  uploadDocument,
+} from '../controllers/document.controller';
+
+const docsRouter = Router();
+
+docsRouter.use(authMiddleware);
+
+docsRouter.post('/upload', upload.single('pdf'), uploadDocument);
+docsRouter.get('/', getDocuments);
+docsRouter.get('/:id', getDocumentById);
+docsRouter.delete('/:id', deleteDocument);
+
+export default docsRouter;
