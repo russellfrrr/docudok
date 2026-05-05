@@ -4,6 +4,7 @@ import DocumentModel from '../models/Document';
 import path from 'path';
 import { extractTextFromPdf } from '../services/pdf.service';
 import { cleanText, splitTextIntoChunks } from '../utils/text';
+import DocumentChunkModel from '../models/DocumentChunk';
 
 export const uploadDocument = async (req: AuthRequest, res: Response) => {
   let documentId: string | null = null;
@@ -37,6 +38,17 @@ export const uploadDocument = async (req: AuthRequest, res: Response) => {
     const rawText = await extractTextFromPdf(filePath);
     const cleanedText = cleanText(rawText);
     const chunks = splitTextIntoChunks(cleanedText);
+
+    const chunkDocuments = chunks.map((chunkText, index) => {
+      return {
+        userId: req.user!.id,
+        documentId: document._id,
+        chunkText,
+        chunkIndex: index,
+      };
+    });
+
+    await DocumentChunkModel.insertMany(chunkDocuments);
 
     document.status = 'ready';
     document.totalChunks = chunks.length;
@@ -107,6 +119,11 @@ export const deleteDocument = async (req: AuthRequest, res: Response) => {
     if (!document) {
       return res.status(404).json({ message: 'Document not found' });
     }
+
+    await DocumentChunkModel.deleteMany({
+      documentId: document._id,
+      userId: req.user.id,
+    });
 
     res.json({ message: 'Document deleted' });
   } catch (err) {
