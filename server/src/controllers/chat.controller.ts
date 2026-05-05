@@ -122,3 +122,29 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ message: 'Send message failed' });
   }
 };
+
+export const getMessagesByChat = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Not authorized' });
+    }
+
+    const chat = await ChatModel.findOne({
+      _id: req.params.chatId,
+      userId: req.user.id,
+    });
+
+    if (!chat) {
+      return res.status(404).json({ message: 'Chat not found' });
+    }
+
+    const messages = await MessageModel.find({
+      chatId: chat._id,
+    }).sort({ createdAt: 1 });
+
+    res.json({ messages });
+  } catch (err) {
+    console.error('Get messages failed', err);
+    res.status(500).json({ message: 'Get messages failed' });
+  }
+};
