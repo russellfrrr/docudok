@@ -1,8 +1,13 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth.middleware';
 import DocumentModel from '../models/Document';
+import path from 'path';
+import { extractTextFromPdf } from '../services/pdf.service';
+import { cleanText, splitTextIntoChunks } from '../utils/text';
 
 export const uploadDocument = async (req: AuthRequest, res: Response) => {
+  let documentId: string | null = null;
+
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -17,6 +22,7 @@ export const uploadDocument = async (req: AuthRequest, res: Response) => {
     };
 
     const title = req.body.title || req.file.originalname;
+    const filePath = path.join('uploads', req.file.filename);
 
     const document = await DocumentModel.create({
       userId: req.user.id,
@@ -26,9 +32,26 @@ export const uploadDocument = async (req: AuthRequest, res: Response) => {
       totalChunks: 0,
     });
 
-    res.status(201).json({ document });
+    documentId = document._id.toString();
+
+    const rawText = await extractTextFromPdf(filePath);
+    const cleanedText = cleanText(rawText);
+    const chunks = splitTextIntoChunks(cleanedText);
+
+    document.status = 'ready';
+    document.totalChunks = chunks.length;
+    await document.save();
+
+    res.status(201).json({ document, chunksPreview: chunks.slice(0, 3) });
   } catch (err) {
     console.error('Upload document failed', err);
+
+    if (documentId) {
+      await DocumentModel.findByIdAndUpdate(documentId, {
+        status: 'failed',
+      });
+    }
+
     res.status(500).json({ message: 'Upload document failed '});
   }
 }
