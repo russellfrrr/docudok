@@ -6,6 +6,7 @@ import {
   getDocumentById,
   getDocuments,
   uploadDocument,
+  searchDocument,
 } from '../controllers/document.controller';
 
 const docsRouter = Router();
@@ -14,6 +15,7 @@ docsRouter.use(authMiddleware);
 
 docsRouter.post('/upload', upload.single('pdf'), uploadDocument);
 docsRouter.get('/', getDocuments);
+docsRouter.post('/:id/search', searchDocument);
 docsRouter.get('/:id', getDocumentById);
 docsRouter.delete('/:id', deleteDocument);
 

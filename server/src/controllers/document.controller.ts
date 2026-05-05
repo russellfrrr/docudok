@@ -7,7 +7,7 @@ import { cleanText, splitTextIntoChunks } from '../utils/text';
 import DocumentChunkModel from '../models/DocumentChunk';
 import { v4 as uuidv4 } from 'uuid';
 import { createEmbedding } from '../services/embedding.service';
-import { saveChunkVectors } from '../services/vector.service';
+import { saveChunkVectors, searchDocumentChunks } from '../services/vector.service';
 
 export const uploadDocument = async (req: AuthRequest, res: Response) => {
   let documentId: string | null = null;
@@ -149,5 +149,43 @@ export const deleteDocument = async (req: AuthRequest, res: Response) => {
   } catch (err) {
     console.error('Delete document failed', err);
     res.status(500).json({ message: 'Delete document failed' });
+  }
+}
+
+export const searchDocument = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Not authorized' });
+    }
+
+    const { question } = req.body;
+
+    if (!question) {
+      return res.status(400).json({ message: 'Question is required' });
+    }
+
+    const document = await DocumentModel.findOne({
+      _id: req.params.id,
+      userId: req.user.id,
+      status: 'ready',
+    });
+
+    if (!document) {
+      return res.status(404).json({ message: 'Document not found or not ready '});
+    }
+
+    const questionVector = await createEmbedding(question);
+
+    const sources = await searchDocumentChunks(
+      questionVector,
+      req.user.id,
+      document._id.toString(),
+      5
+    );
+
+    res.json({ sources });
+  } catch (err) {
+    console.error('Search document failed', err);
+    res.status(500).json({ message: 'Search document failed' });
   }
 }

@@ -30,6 +30,53 @@ interface SaveVectorInput {
   chunkIndex: number;
 }
 
+export interface SearchResult {
+  chunkText: string;
+  chunkIndex: number;
+  score: number;
+}
+
+export const searchDocumentChunks = async (
+  vector: number[],
+  userId: string,
+  documentId: string,
+  limit = 5
+): Promise<SearchResult[]> => {
+  await ensureVectorCollection();
+
+  const results = await qdrant.search(collectionName, {
+    vector,
+    limit,
+    filter: {
+      must: [
+        {
+          key: 'userId',
+          match: {
+            value: userId,
+          },
+        },
+        {
+          key: 'documentId',
+          match: {
+            value: documentId,
+          },
+        },
+      ],
+    },
+    with_payload: true,
+  });
+
+  return results.map((result) => {
+    const payload = result.payload || {};
+
+    return {
+      chunkText: String(payload.chunkText || ''),
+      chunkIndex: Number(payload.chunkIndex || 0),
+      score: result.score,
+    };
+  });
+}
+
 export const saveChunkVectors = async (items: SaveVectorInput[]) => {
   await ensureVectorCollection();
 
