@@ -5,6 +5,9 @@ import path from 'path';
 import { extractTextFromPdf } from '../services/pdf.service';
 import { cleanText, splitTextIntoChunks } from '../utils/text';
 import DocumentChunkModel from '../models/DocumentChunk';
+import { v4 as uuidv4 } from 'uuid';
+import { createEmbedding } from '../services/embedding.service';
+import { saveChunkVectors } from '../services/vector.service';
 
 export const uploadDocument = async (req: AuthRequest, res: Response) => {
   let documentId: string | null = null;
@@ -48,7 +51,24 @@ export const uploadDocument = async (req: AuthRequest, res: Response) => {
       };
     });
 
-    await DocumentChunkModel.insertMany(chunkDocuments);
+    const savedChunks = await DocumentChunkModel.insertMany(chunkDocuments);
+    const vectorItems = [];
+
+    for (const chunk of savedChunks) {
+      const vector = await createEmbedding(chunk.chunkText);
+
+      vectorItems.push({
+        id: uuidv4(),
+        vector,
+        userId: req.user!.id,
+        documentId: document._id.toString(),
+        chunkId: chunk._id.toString(),
+        chunkText: chunk.chunkText,
+        chunkIndex: chunk.chunkIndex,
+      });
+    }
+
+    await saveChunkVectors(vectorItems);
 
     document.status = 'ready';
     document.totalChunks = chunks.length;
