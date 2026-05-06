@@ -5,6 +5,7 @@ import { useAuthStore } from '@/store/auth.store';
 import { LoginPage } from '@/pages/LoginPage';
 import { RegisterPage } from '@/pages/RegisterPage';
 import { DashboardPage } from '@/pages/DashboardPage';
+import { DocumentChatPage } from '@/pages/DocumentChatPage';
 
 export const App = () => {
   const token = useAuthStore((state) => state.token);
@@ -33,6 +34,10 @@ export const App = () => {
       <Route
         path="/register"
         element={token ? <Navigate to="/" /> : <RegisterPage />}
+      />
+      <Route
+        path="/documents/:documentId"
+        element={token ? <DocumentChatPage /> : <Navigate to="/login" />}
       />
     </Routes>
   );

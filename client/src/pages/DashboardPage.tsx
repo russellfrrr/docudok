@@ -1,5 +1,6 @@
 import { FileText, LogOut, RefreshCcw, AlertCircle, Upload } from 'lucide-react';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { uploadDocument } from '@/services/document.service';
 import { useAuthStore } from '@/store/auth.store';
@@ -185,33 +186,35 @@ export const DashboardPage = () => {
         {documentsQuery.data && documentsQuery.data.documents.length > 0 && (
           <div className="grid gap-3">
             {documentsQuery.data.documents.map((document) => (
-              <Card key={document._id}>
-                <CardHeader className="flex flex-row items-center justify-between gap-4">
-                  <div className="min-w-0">
-                    <CardTitle className="truncate text-base">
-                      {document.title}
-                    </CardTitle>
-                    <p className="mt-1 truncate text-sm text-muted-foreground">
-                      {document.fileName}
-                    </p>
-                  </div>
+              <Card key={document._id} className="transition hover:bg-accent">
+                <Link to={`/documents/${document._id}`} className="block">
+                  <CardHeader className="flex flex-row items-center justify-between gap-4">
+                    <div className="min-w-0">
+                      <CardTitle className="truncate text-base">
+                        {document.title}
+                      </CardTitle>
+                      <p className="mt-1 truncate text-sm text-muted-foreground">
+                        {document.fileName}
+                      </p>
+                    </div>
 
-                  <span className="rounded-md border px-2 py-1 text-xs capitalize text-muted-foreground">
-                    {document.status}
-                  </span>
-                </CardHeader>
+                    <span className="rounded-md border px-2 py-1 text-xs capitalize text-muted-foreground">
+                      {document.status}
+                    </span>
+                  </CardHeader>
 
-                <CardContent className="flex items-center justify-between text-sm text-muted-foreground">
-                  <span>{document.totalChunks} chunks</span>
-                  <span>
-                    {new Date(document.createdAt).toLocaleDateString()}
-                  </span>
-                </CardContent>
+                  <CardContent className="flex items-center justify-between text-sm text-muted-foreground">
+                    <span>{document.totalChunks} chunks</span>
+                    <span>
+                      {new Date(document.createdAt).toLocaleDateString()}
+                    </span>
+                  </CardContent>
+                </Link>
               </Card>
             ))}
           </div>
         )}
       </section>
-    </main> 
+    </main>
   );
 };

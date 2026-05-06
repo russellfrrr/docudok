@@ -1,5 +1,10 @@
 import { api } from './api';
-import type { DocumentsResponse, UploadDocumentResponse } from '@/types/document';
+import type {
+  DocumentsResponse,
+  UploadDocumentResponse,
+  DocumentResponse,
+  AskDocumentResponse,
+} from '@/types/document';
 
 export const getDocuments = async (): Promise<DocumentsResponse> => {
   const response = await api.get<DocumentsResponse>('/documents');
@@ -26,6 +31,25 @@ export const uploadDocument = async (
         'Content-Type': 'multipart/form-data',
       },
     }
+  );
+
+  return response.data;
+}
+
+export const getDocumentById = async (
+  documentId: string
+): Promise<DocumentResponse> => {
+  const response = await api.get<DocumentResponse>(`/documents/${documentId}`);
+  return response.data;
+};
+
+export const askDocument = async (
+  documentId: string,
+  question: string
+): Promise<AskDocumentResponse> => {
+  const response = await api.post<AskDocumentResponse>(
+    `/documents/${documentId}/ask`,
+    { question }
   );
 
   return response.data;
