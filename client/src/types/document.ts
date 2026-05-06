@@ -13,3 +13,8 @@ export interface Document {
 export interface DocumentsResponse {
   documents: Document[];
 }
+
+export interface UploadDocumentResponse {
+  document: Document;
+  chunksPreview?: string[];
+}

@@ -1,8 +1,12 @@
-import { FileText, LogOut, RefreshCcw } from 'lucide-react';
-import { useQueryClient } from '@tanstack/react-query';
+import { FileText, LogOut, RefreshCcw, AlertCircle, Upload } from 'lucide-react';
+import { useState } from 'react';
+import { useQueryClient, useMutation } from '@tanstack/react-query';
+import { uploadDocument } from '@/services/document.service';
 import { useAuthStore } from '@/store/auth.store';
 import { useDocuments } from '@/hooks/useDocuments';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Card,
   CardContent,
@@ -17,6 +21,35 @@ export const DashboardPage = () => {
 
   const documentsQuery = useDocuments();
 
+  const [title, setTitle] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  const uploadMutation = useMutation({
+    mutationFn: async () => {
+      if (!selectedFile) {
+        throw new Error('Please choose a PDF file');
+      }
+
+      return uploadDocument(selectedFile, title);
+    },
+    onSuccess: () => {
+      setTitle('');
+      setSelectedFile(null);
+      queryClient.invalidateQueries({ queryKey: ['documents'] });
+    },
+  });
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      setSelectedFile(null);
+      return;
+    }
+
+    setSelectedFile(file);
+  }
+
   const handleLogout = () => {
     logout();
     queryClient.clear();
@@ -25,7 +58,7 @@ export const DashboardPage = () => {
   return (
     <main className="min-h-screen bg-muted">
       <header className="border-b bg-background">
-        <div className="mx-auth flex max-w-5xl items-center justify-between px-4 py-4">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
           <div>
             <h1 className="text-xl font-semibold text-foreground">DocuDok</h1>
             <p className="text-sm text-muted-foreground">
@@ -69,6 +102,56 @@ export const DashboardPage = () => {
           </Button>
         </div>
 
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-base">Upload PDF</CardTitle>
+          </CardHeader>
+
+          <CardContent>
+            <form
+              className="grid gap-4 md:grid-cols-[1fr_1fr_auto]"
+              onSubmit={(event) => {
+                event.preventDefault();
+                uploadMutation.mutate();
+              }}
+            >
+              <Input
+                placeholder="Document title optional"
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+              />
+
+              <Input
+                type="file"
+                accept="application/pdf"
+                onChange={handleFileChange}
+              />
+
+              <Button type="submit" disabled={uploadMutation.isPending}>
+                <Upload className="h-4 w-4" />
+                {uploadMutation.isPending ? 'Uploading...' : 'Upload'}
+              </Button>
+            </form>
+
+            {selectedFile && (
+              <p className="mt-3 text-sm text-muted-foreground">
+                Selected: {selectedFile.name}
+              </p>
+            )}
+
+            {uploadMutation.isError && (
+              <Alert variant="destructive" className="mt-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  {uploadMutation.error instanceof Error
+                    ? uploadMutation.error.message
+                    : 'Upload failed'}
+                </AlertDescription>
+              </Alert>
+            )}
+          </CardContent>
+        </Card>
+
         {documentsQuery.isLoading && (
           <Card>
             <CardContent className="py-6 text-sm text-muted-foreground">
@@ -93,7 +176,7 @@ export const DashboardPage = () => {
                 No documents yet
               </h3>
               <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-                Upload your first PDF text and it will show up here.
+                Upload your first PDF and it will show up here.
               </p>
             </CardContent>
           </Card>
