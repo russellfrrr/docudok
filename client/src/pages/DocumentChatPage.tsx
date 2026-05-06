@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Loader2, Send } from 'lucide-react';
-import { askDocument, getDocumentById } from '@/services/document.service';
-import type { AskDocumentResponse } from '@/types/document';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { ArrowLeft, Loader2, Send, Plus, MessageSquare } from 'lucide-react';
+import { getDocumentById } from '@/services/document.service';
+import { createChat, sendMessage } from '@/services/chat.service';
+import { useChats } from '@/hooks/useChats';
+import { useMessages } from '@/hooks/useMessages';
+import type { Chat } from '@/types/chat';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -16,8 +19,10 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export const DocumentChatPage = () => {
   const { documentId } = useParams();
-  const [question, setQuestion] = useState('');
-  const [lastAnswer, setLastAnswer] = useState<AskDocumentResponse | null>(null);
+  const queryClient = useQueryClient();
+
+  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+  const [message, setMessage] = useState('');
 
   const documentQuery = useQuery({
     queryKey: ['document', documentId],
@@ -25,27 +30,59 @@ export const DocumentChatPage = () => {
     enabled: Boolean(documentId),
   });
 
-  const askMutation = useMutation({
+  const chatsQuery = useChats(documentId);
+  const messagesQuery = useMessages(selectedChatId);
+
+  useEffect(() => {
+    if (!selectedChatId && chatsQuery.data?.chats.length) {
+      setSelectedChatId(chatsQuery.data.chats[0]._id);
+    }
+  }, [chatsQuery.data, selectedChatId]);
+
+  const createChatMutation = useMutation({
     mutationFn: async () => {
       if (!documentId) {
         throw new Error('Document ID is missing');
       }
 
-      if (!question.trim()) {
-        throw new Error('Question is required');
-      }
-
-      return askDocument(documentId, question.trim());
+      return createChat({
+        documentId,
+        title: documentQuery.data?.document.title || 'Document chat',
+      });
     },
     onSuccess: (data) => {
-      setLastAnswer(data);
-      setQuestion('');
+      setSelectedChatId(data.chat._id);
+      queryClient.invalidateQueries({ queryKey: ['chats', documentId] });
     },
   })
+
+  const sendMessageMutation = useMutation({
+    mutationFn: async () => {
+      if (!selectedChatId) {
+        throw new Error('Create or select a chat first');
+      }
+
+      if (!message.trim()) {
+        throw new Error('Message is required');
+      }
+
+      return sendMessage({
+        chatId: selectedChatId,
+        content: message.trim(),
+      });
+    },
+    onSuccess: () => {
+      setMessage('');
+      queryClient.invalidateQueries({ queryKey: ['messages', selectedChatId] });
+    },
+  });
 
   if (!documentId) {
     return <Navigate to="/" />;
   }
+
+  const chats: Chat[] = chatsQuery.data?.chats || [];
+  const messages = messagesQuery.data?.messages || [];
 
   return (
     <main className="min-h-screen bg-muted">
@@ -69,98 +106,174 @@ export const DocumentChatPage = () => {
         </div>
       </header>
 
-      <section className="mx-auto grid max-w-5xl gap-6 px-4 py-8">
-        {documentQuery.isLoading && (
-          <Card>
-            <CardContent className="py-6 text-sm text-muted-foreground">
-              Loading document...
-            </CardContent>
-          </Card>
-        )}
-
-        {documentQuery.isError && (
-          <Alert variant="destructive">
-            <AlertDescription>Failed to load document.</AlertDescription>
-          </Alert>
-        )}
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Ask this document</CardTitle>
-          </CardHeader>
-
-          <CardContent>
-            <form
-              className="flex gap-3"
-              onSubmit={(event) => {
-                event.preventDefault();
-                askMutation.mutate();
-              }}
-            >
-              <Input
-                value={question}
-                onChange={(event) => setQuestion(event.target.value)}
-                placeholder="Ask a question about this PDF"
-              />
-
-              <Button type="submit" disabled={askMutation.isPending}>
-                {askMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Send className="h-4 w-4" />
-                )}
-                Ask
-              </Button>
-            </form>
-
-            {askMutation.isError && (
-              <Alert variant="destructive" className="mt-4">
-                <AlertDescription>
-                  {askMutation.error instanceof Error
-                    ? askMutation.error.message
-                    : 'Ask failed'}
-                </AlertDescription>
-              </Alert>
+      <section className="mx-auto grid max-w-6xl gap-6 px-4 py-8 lg:grid-cols-[280px_1fr]">
+        <aside className="space-y-4">
+          <Button
+            className="w-full"
+            onClick={() => createChatMutation.mutate()}
+            disabled={createChatMutation.isPending}
+          >
+            {createChatMutation.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Plus className="h-4 w-4" />
             )}
-          </CardContent>
-        </Card>
+            New chat
+          </Button>
 
-        {lastAnswer && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Answer</CardTitle>
+              <CardTitle className="text-base">Chats</CardTitle>
+            </CardHeader>
+
+            <CardContent className="space-y-2">
+              {chatsQuery.isLoading && (
+                <p className="text-sm text-muted-foreground">Loading chats...</p>
+              )}
+
+              {chats.length === 0 && !chatsQuery.isLoading && (
+                <p className="text-sm text-muted-foreground">
+                  No chats yet. Start a new one.
+                </p>
+              )}
+
+              {chats.map((chat) => (
+                <button
+                  key={chat._id}
+                  type="button"
+                  onClick={() => setSelectedChatId(chat._id)}
+                  className={`flex w-full items-center gap-2 rounded-md border px-3 py-2 text-left text-sm transition ${
+                    selectedChatId === chat._id
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-background hover:bg-accent'
+                  }`}
+                >
+                  <MessageSquare className="h-4 w-4" />
+                  <span className="truncate">{chat.title}</span>
+                </button>
+              ))}
+            </CardContent>
+          </Card>
+        </aside>
+
+        <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Messages</CardTitle>
             </CardHeader>
 
             <CardContent className="space-y-4">
-              <p className="whitespace-pre-wrap text-sm leading-6 text-foreground">
-                {lastAnswer.answer}
-              </p>
-
-              <div>
-                <h2 className="mb-2 text-sm font-medium text-foreground">
-                  Sources
-                </h2>
-
-                <div className="grid gap-3">
-                  {lastAnswer.sources.map((source) => (
-                    <div
-                      key={`${source.chunkIndex}-${source.score}`}
-                      className="rounded-md border bg-background p-3"
-                    >
-                      <div className="mb-2 text-xs text-muted-foreground">
-                        Chunk {source.chunkIndex} - Score{source.score.toFixed(3)}
-                        {source.score.toFixed(3)}
-                      </div>
-                      <p className="line-clamp-4 text-sm text-muted-foreground">
-                        {source.chunkText}
-                      </p>
-                    </div>
-                  ))}
+              {!selectedChatId && (
+                <div className="rounded-md border bg-background p-6 text-center text-sm text-muted-foreground">
+                  Create a chat to start asking questions.
                 </div>
-              </div>
+              )}
+
+              {messagesQuery.isLoading && selectedChatId && (
+                <p className="text-sm text-muted-foreground">Loading messages...</p>
+              )}
+
+              {selectedChatId && messages.length === 0 && !messagesQuery.isLoading && (
+                <div className="rounded-md border bg-background p-6 text-center text-sm text-muted-foreground">
+                  Ask your first question about this document.
+                </div>
+              )}
+
+              {messages.map((chatMessage) => (
+                <div
+                  key={chatMessage._id}
+                  className={`rounded-md border p-4 ${
+                    chatMessage.role === 'user'
+                      ? 'bg-background'
+                      : 'bg-secondary'
+                  }`}
+                >
+                  <div className="mb-2 text-xs font-medium uppercase text-muted-foreground">
+                    {chatMessage.role}
+                  </div>
+
+                  <p className="whitespace-pre-wrap text-sm leading-6 text-foreground">
+                    {chatMessage.content}
+                  </p>
+
+                  {chatMessage.sources.length > 0 && (
+                    <div className="mt-4 space-y-2">
+                      <div className="text-xs font-medium text-muted-foreground">
+                        Sources
+                      </div>
+
+                      {chatMessage.sources.map((source) => (
+                        <div
+                          key={`${chatMessage._id}-${source.chunkIndex}-${source.score}`}
+                          className="rounded-md border bg-background p-3"
+                        >
+                          <div className="mb-1 text-xs text-muted-foreground">
+                            Chunk {source.chunkIndex} - Score{' '}
+                            {source.score.toFixed(3)}
+                          </div>
+                          <p className="line-clamp-3 text-sm text-muted-foreground">
+                            {source.chunkText}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {sendMessageMutation.isError && (
+                <Alert variant="destructive">
+                  <AlertDescription>
+                    {sendMessageMutation.error instanceof Error
+                      ? sendMessageMutation.error.message
+                      : 'Send message failed'}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {createChatMutation.isError && (
+                <Alert variant="destructive">
+                  <AlertDescription>
+                    {createChatMutation.error instanceof Error
+                      ? createChatMutation.error.message
+                      : 'Create chat failed'}
+                  </AlertDescription>
+                </Alert>
+              )}
             </CardContent>
           </Card>
-        )}
+
+          <Card>
+            <CardContent className="pt-6">
+              <form
+                className="flex gap-3"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  sendMessageMutation.mutate();
+                }}
+              >
+                <Input
+                  value={message}
+                  onChange={(event) => setMessage(event.target.value)}
+                  placeholder="Ask a question about this document"
+                  disabled={!selectedChatId || sendMessageMutation.isPending}
+                />
+
+                <Button
+                  type="submit"
+                  disabled={!selectedChatId || sendMessageMutation.isPending}
+                >
+                  {sendMessageMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                  Send
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
       </section>
     </main>
   );
