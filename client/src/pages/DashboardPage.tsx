@@ -224,7 +224,7 @@ export const DashboardPage = () => {
         {documentsQuery.data && documentsQuery.data.documents.length > 0 && (
           <div className="grid gap-3">
             {documentsQuery.data.documents.map((document) => (
-              <Card key={document._id} className="transition hover:bg-accent">
+              <Card key={document._id} className="flex transition hover:bg-accent">
                 <Link to={`/documents/${document._id}`} className="block min-w-0 flex-1">
                   <CardHeader className="flex flex-row items-center justify-between gap-4">
                     <div className="min-w-0">
