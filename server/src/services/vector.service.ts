@@ -95,3 +95,30 @@ export const saveChunkVectors = async (items: SaveVectorInput[]) => {
     })),
   });
 }
+
+export const deleteDocumentVectors = async (
+  userId: string,
+  documentId: string
+) => {
+  await ensureVectorCollection();
+
+  await qdrant.delete(collectionName, {
+    wait: true,
+    filter: {
+      must: [
+        {
+          key: 'userId',
+          match: {
+            value: userId,
+          },
+        },
+        {
+          key: 'documentId',
+          match: {
+            value: documentId,
+          },
+        },
+      ],
+    },
+  });
+};

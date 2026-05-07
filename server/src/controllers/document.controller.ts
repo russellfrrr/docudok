@@ -1,14 +1,17 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth.middleware';
 import DocumentModel from '../models/Document';
+import fs from 'fs';
 import path from 'path';
 import { extractTextFromPdf } from '../services/pdf.service';
 import { cleanText, splitTextIntoChunks } from '../utils/text';
 import DocumentChunkModel from '../models/DocumentChunk';
 import { v4 as uuidv4 } from 'uuid';
 import { createEmbedding } from '../services/embedding.service';
-import { saveChunkVectors, searchDocumentChunks } from '../services/vector.service';
+import { saveChunkVectors, searchDocumentChunks, deleteDocumentVectors } from '../services/vector.service';
 import { generateAnswer } from '../services/ai.service';
+import ChatModel from '../models/Chat';
+import MessageModel from '../models/Message';
 
 export const uploadDocument = async (req: AuthRequest, res: Response) => {
   let documentId: string | null = null;
@@ -141,10 +144,36 @@ export const deleteDocument = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ message: 'Document not found' });
     }
 
+    const chats = await ChatModel.find({
+      documentId: document._id,
+      userId: req.user.id,
+    });
+
+    const chatIds = chats.map((chat) => chat._id);
+
+    await MessageModel.deleteMany({
+      chatId: {
+        $in: chatIds,
+      },
+    });
+
+    await ChatModel.deleteMany({
+      documentId: document._id,
+      userId: req.user.id,
+    });
+
     await DocumentChunkModel.deleteMany({
       documentId: document._id,
       userId: req.user.id,
     });
+
+    await deleteDocumentVectors(req.user.id, document._id.toString());
+
+    const filePath = path.join('uploads', document.fileName);
+
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
 
     res.json({ message: 'Document deleted' });
   } catch (err) {
