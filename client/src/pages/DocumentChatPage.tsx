@@ -83,6 +83,7 @@ export const DocumentChatPage = () => {
 
   const chats: Chat[] = chatsQuery.data?.chats || [];
   const messages = messagesQuery.data?.messages || [];
+  const documentIsReady = documentQuery.data?.document.status === 'ready';
 
   return (
     <main className="min-h-screen bg-muted">
@@ -256,12 +257,12 @@ export const DocumentChatPage = () => {
                   value={message}
                   onChange={(event) => setMessage(event.target.value)}
                   placeholder="Ask a question about this document"
-                  disabled={!selectedChatId || sendMessageMutation.isPending}
+                  disabled={!selectedChatId || !documentIsReady || sendMessageMutation.isPending}
                 />
 
                 <Button
                   type="submit"
-                  disabled={!selectedChatId || sendMessageMutation.isPending}
+                  disabled={!selectedChatId || !documentIsReady || sendMessageMutation.isPending}
                 >
                   {sendMessageMutation.isPending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />

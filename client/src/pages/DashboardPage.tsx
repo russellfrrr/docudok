@@ -1,5 +1,5 @@
 import { FileText, LogOut, RefreshCcw, AlertCircle, Upload } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { uploadDocument } from '@/services/document.service';
@@ -24,6 +24,7 @@ export const DashboardPage = () => {
 
   const [title, setTitle] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const uploadMutation = useMutation({
     mutationFn: async () => {
@@ -36,6 +37,11 @@ export const DashboardPage = () => {
     onSuccess: () => {
       setTitle('');
       setSelectedFile(null);
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+
       queryClient.invalidateQueries({ queryKey: ['documents'] });
     },
   });
@@ -55,6 +61,18 @@ export const DashboardPage = () => {
     logout();
     queryClient.clear();
   };
+
+  const getStatusClassName = (status: string) => {
+    if (status === 'ready') {
+      return 'border-emerald-200 bg-emerald-50 text-emerald-700';
+    }
+
+    if (status === 'failed') {
+      return 'border-red-200 bg-red-50 text-red-700';
+    }
+
+    return 'border-amber-200 bg-amber-50 text-amber-700';
+  }
 
   return (
     <main className="min-h-screen bg-muted">
@@ -123,12 +141,13 @@ export const DashboardPage = () => {
               />
 
               <Input
+                ref={fileInputRef}
                 type="file"
                 accept="application/pdf"
                 onChange={handleFileChange}
               />
 
-              <Button type="submit" disabled={uploadMutation.isPending}>
+              <Button type="submit" disabled={!selectedFile || uploadMutation.isPending}>
                 <Upload className="h-4 w-4" />
                 {uploadMutation.isPending ? 'Uploading...' : 'Upload'}
               </Button>
@@ -198,7 +217,9 @@ export const DashboardPage = () => {
                       </p>
                     </div>
 
-                    <span className="rounded-md border px-2 py-1 text-xs capitalize text-muted-foreground">
+                    <span
+                      className={`rounded-md border px-2 py-1 text-xs capitalize ${getStatusClassName(document.status)}`}
+                    >
                       {document.status}
                     </span>
                   </CardHeader>

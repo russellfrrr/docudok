@@ -2,7 +2,7 @@ import axios from 'axios';
 import { useAuthStore } from '@/store/auth.store';
 
 export const api = axios.create({
-  baseURL: 'http://localhost:5000/api/v1',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1',
 });
 
 api.interceptors.request.use((config) => {
@@ -13,4 +13,19 @@ api.interceptors.request.use((config) => {
   }
 
   return config;
-})
+});
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error.response?.status;
+    const message =
+    error.response?.data?.message || error.message || 'Something went wrong';
+
+    if (status === 401) {
+      useAuthStore.getState().logout();
+    }
+
+    return Promise.reject(new Error(message));
+  }
+);
