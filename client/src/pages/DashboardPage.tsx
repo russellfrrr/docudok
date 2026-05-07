@@ -1,8 +1,8 @@
-import { FileText, LogOut, RefreshCcw, AlertCircle, Upload } from 'lucide-react';
+import { FileText, LogOut, RefreshCcw, AlertCircle, Upload, Trash2 } from 'lucide-react';
 import { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
-import { uploadDocument } from '@/services/document.service';
+import { uploadDocument, deleteDocument } from '@/services/document.service';
 import { useAuthStore } from '@/store/auth.store';
 import { useDocuments } from '@/hooks/useDocuments';
 import { Button } from '@/components/ui/button';
@@ -45,6 +45,25 @@ export const DashboardPage = () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] });
     },
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteDocument,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['documents'] });
+    },
+  });
+
+  const handleDeleteDocument = (documentId: string) => {
+    const confirmed = window.confirm(
+      `Delete this document? This cannot be undone.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    deleteMutation.mutate(documentId);
+  }
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -206,7 +225,7 @@ export const DashboardPage = () => {
           <div className="grid gap-3">
             {documentsQuery.data.documents.map((document) => (
               <Card key={document._id} className="transition hover:bg-accent">
-                <Link to={`/documents/${document._id}`} className="block">
+                <Link to={`/documents/${document._id}`} className="block min-w-0 flex-1">
                   <CardHeader className="flex flex-row items-center justify-between gap-4">
                     <div className="min-w-0">
                       <CardTitle className="truncate text-base">
@@ -231,6 +250,17 @@ export const DashboardPage = () => {
                     </span>
                   </CardContent>
                 </Link>
+
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="mr-3 mt-3 text-muted-foreground hover:text-destructive"
+                  onClick={() => handleDeleteDocument(document._id)}
+                  disabled={deleteMutation.isPending}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </Card>
             ))}
           </div>

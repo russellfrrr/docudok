@@ -54,3 +54,7 @@ export const askDocument = async (
 
   return response.data;
 }
+
+export const deleteDocument = async (documentId: string): Promise<void> => {
+  await api.delete(`/documents/${documentId}`);
+};
