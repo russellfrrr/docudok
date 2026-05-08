@@ -9,6 +9,7 @@ import { useMessages } from '@/hooks/useMessages';
 import type { Chat } from '@/types/chat';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { AppLogo } from '@/components/layout/AppLogo';
 import {
   Card,
   CardContent,
@@ -87,17 +88,21 @@ export const DocumentChatPage = () => {
 
   return (
     <main className="min-h-screen bg-muted">
-      <header className="border-b bg-background">
-        <div className="mx-auto flex max-w-5xl items-center gap-4 px-4 py-4">
+      <header className="border-b bg-card">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4">
+          <AppLogo />
+
           <Button variant="outline" size="sm" asChild>
             <Link to="/">
               <ArrowLeft className="h-4 w-4" />
               Back
             </Link>
           </Button>
+        </div>
 
+        <div className="mx-auto max-w-6xl px-4 pb-4">
           <div className="min-w-0">
-            <h1 className="truncate text-xl font-semibold text-foreground">
+            <h1 className="truncate text-2xl font-semibold text-foreground">
               {documentQuery.data?.document.title || 'Document'}
             </h1>
             <p className="text-sm capitalize text-muted-foreground">
@@ -122,7 +127,7 @@ export const DocumentChatPage = () => {
             New chat
           </Button>
 
-          <Card>
+          <Card className="border bg-card shadow-sm">
             <CardHeader>
               <CardTitle className="text-base">Chats</CardTitle>
             </CardHeader>
@@ -158,7 +163,7 @@ export const DocumentChatPage = () => {
         </aside>
 
         <div className="space-y-4">
-          <Card>
+          <Card className="border bg-card shadow-sm">
             <CardHeader>
               <CardTitle className="text-base">Messages</CardTitle>
             </CardHeader>
@@ -185,8 +190,8 @@ export const DocumentChatPage = () => {
                   key={chatMessage._id}
                   className={`rounded-md border p-4 ${
                     chatMessage.role === 'user'
-                      ? 'bg-background'
-                      : 'bg-secondary'
+                      ? 'ml-auto max-w-[85%] bg-background'
+                      : 'mr-auto max-w-[85%] bg-secondary'
                   }`}
                 >
                   <div className="mb-2 text-xs font-medium uppercase text-muted-foreground">
@@ -244,7 +249,7 @@ export const DocumentChatPage = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border bg-card shadow-sm">
             <CardContent className="pt-6">
               <form
                 className="flex gap-3"
