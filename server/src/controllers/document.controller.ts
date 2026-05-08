@@ -40,13 +40,15 @@ export const uploadDocument = async (req: AuthRequest, res: Response) => {
       totalChunks: 0,
     });
 
-    const processedDocument = await processDocument({
+    processDocument({
       documentId: document._id.toString(),
       userId: req.user.id,
       filePath,
+    }).catch((err) => {
+      console.error('Background document processing failed', err);
     });
 
-    res.status(201).json({ document: processedDocument });
+    res.status(201).json({ document });
   } catch (err) {
     console.error('Upload document failed', err);
     res.status(500).json({ message: 'Upload document failed' });
