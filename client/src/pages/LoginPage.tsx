@@ -8,6 +8,7 @@ import { useAuthStore } from '@/store/auth.store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { AuthLayout } from '@/components/layout/AuthLayout';
 import {
   Card,
   CardContent,
@@ -29,7 +30,7 @@ export const LoginPage = () => {
     onSuccess: (data) => {
       setAuth(data.token, data.user);
       navigate('/');
-    }
+    },
   });
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -41,16 +42,20 @@ export const LoginPage = () => {
     });
   };
 
-  const errorMessage = 
+  const errorMessage =
     loginMutation.error instanceof Error
       ? loginMutation.error.message
       : 'Login failed';
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-muted px-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>Log in</CardTitle>
+    <AuthLayout
+      title="Welcome back"
+      description="Log in to continue working with your document workspace."
+    >
+
+      <Card className="border bg-card shadow-sm">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-xl">Log in</CardTitle>
           <CardDescription>
             Continue to your document workspace.
           </CardDescription>
@@ -101,12 +106,12 @@ export const LoginPage = () => {
 
           <p className="mt-4 text-center text-sm text-muted-foreground">
             No account yet?{' '}
-            <Link to="/register" className="text-foreground underline">
+            <Link to="/register" className="font-medium text-foreground underline">
               Create one
             </Link>
           </p>
         </CardContent>
       </Card>
-    </main>
+    </AuthLayout>
   );
-}
+};
