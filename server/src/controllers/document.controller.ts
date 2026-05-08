@@ -1,33 +1,33 @@
+import fs from 'fs';
+import path from 'path';
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth.middleware';
 import DocumentModel from '../models/Document';
-import fs from 'fs';
-import path from 'path';
-import { extractTextFromPdf } from '../services/pdf.service';
-import { cleanText, splitTextIntoChunks } from '../utils/text';
 import DocumentChunkModel from '../models/DocumentChunk';
-import { v4 as uuidv4 } from 'uuid';
-import { createEmbedding } from '../services/embedding.service';
-import { saveChunkVectors, searchDocumentChunks, deleteDocumentVectors } from '../services/vector.service';
-import { generateAnswer } from '../services/ai.service';
 import ChatModel from '../models/Chat';
 import MessageModel from '../models/Message';
+import { createEmbedding } from '../services/embedding.service';
+import {
+  deleteDocumentVectors,
+  searchDocumentChunks,
+} from '../services/vector.service';
+import { generateAnswer } from '../services/ai.service';
+import { processDocument } from '../services/document-processing.service';
+
 
 export const uploadDocument = async (req: AuthRequest, res: Response) => {
-  let documentId: string | null = null;
-
   try {
     if (!req.user) {
-      return res.status(401).json({
+      return res.status(401).json({ 
         message: 'Not authorized'
-      })
+      });
     }
 
     if (!req.file) {
       return res.status(400).json({
         message: 'PDF file is required',
-      })
-    };
+      });
+    }
 
     const title = req.body.title || req.file.originalname;
     const filePath = path.join('uploads', req.file.filename);
@@ -40,55 +40,16 @@ export const uploadDocument = async (req: AuthRequest, res: Response) => {
       totalChunks: 0,
     });
 
-    documentId = document._id.toString();
-
-    const rawText = await extractTextFromPdf(filePath);
-    const cleanedText = cleanText(rawText);
-    const chunks = splitTextIntoChunks(cleanedText);
-
-    const chunkDocuments = chunks.map((chunkText, index) => {
-      return {
-        userId: req.user!.id,
-        documentId: document._id,
-        chunkText,
-        chunkIndex: index,
-      };
+    const processedDocument = await processDocument({
+      documentId: document._id.toString(),
+      userId: req.user.id,
+      filePath,
     });
 
-    const savedChunks = await DocumentChunkModel.insertMany(chunkDocuments);
-    const vectorItems = [];
-
-    for (const chunk of savedChunks) {
-      const vector = await createEmbedding(chunk.chunkText);
-
-      vectorItems.push({
-        id: uuidv4(),
-        vector,
-        userId: req.user!.id,
-        documentId: document._id.toString(),
-        chunkId: chunk._id.toString(),
-        chunkText: chunk.chunkText,
-        chunkIndex: chunk.chunkIndex,
-      });
-    }
-
-    await saveChunkVectors(vectorItems);
-
-    document.status = 'ready';
-    document.totalChunks = chunks.length;
-    await document.save();
-
-    res.status(201).json({ document, chunksPreview: chunks.slice(0, 3) });
+    res.status(201).json({ document: processedDocument });
   } catch (err) {
     console.error('Upload document failed', err);
-
-    if (documentId) {
-      await DocumentModel.findByIdAndUpdate(documentId, {
-        status: 'failed',
-      });
-    }
-
-    res.status(500).json({ message: 'Upload document failed '});
+    res.status(500).json({ message: 'Upload document failed' });
   }
 }
 

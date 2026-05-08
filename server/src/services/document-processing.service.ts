@@ -1,0 +1,81 @@
+import { v4 as uuidv4 } from 'uuid';
+import DocumentModel from '../models/Document';
+import DocumentChunkModel from '../models/DocumentChunk';
+import { extractTextFromPdf } from './pdf.service';    
+import { createEmbedding } from './embedding.service';
+import { saveChunkVectors } from './vector.service';
+import { cleanText, splitTextIntoChunks } from '../utils/text';
+
+interface ProcessDocumentInput {
+  documentId: string;
+  userId: string;
+  filePath: string;
+}
+
+export const processDocument = async ({
+  documentId,
+  userId,
+  filePath,
+}: ProcessDocumentInput) => {
+  try {
+    const document = await DocumentModel.findOne({
+      _id: documentId,
+      userId,
+    });
+
+    if (!document) {
+      throw new Error('Document not found');
+    }
+
+    const rawText = await extractTextFromPdf(filePath);
+    const cleanedText = cleanText(rawText);
+    const chunks = splitTextIntoChunks(cleanedText);
+
+    const chunkDocuments = chunks.map((chunkText, index) => {
+      return {
+        userId,
+        documentId: document._id,
+        chunkText,
+        chunkIndex: index,
+      };
+    });
+
+    const savedChunks = await DocumentChunkModel.insertMany(chunkDocuments);
+    const vectorItems = [];
+
+    for (const chunk of savedChunks) {
+      const vector = await createEmbedding(chunk.chunkText);
+
+      vectorItems.push({
+        id: uuidv4(),
+        vector,
+        userId,
+        documentId: document._id.toString(),
+        chunkId: chunk._id.toString(),
+        chunkText: chunk.chunkText,
+        chunkIndex: chunk.chunkIndex,
+      });
+    }
+
+    await saveChunkVectors(vectorItems);
+
+    document.status = 'ready';
+    document.totalChunks = chunks.length;
+    await document.save();
+
+    return document;
+  } catch (err) {
+    console.error('Process document failed', err);
+
+    await DocumentModel.findByIdAndUpdate(documentId, {
+      status: 'failed',
+    });
+
+    await DocumentChunkModel.deleteMany({
+      documentId,
+      userId,
+    });
+
+    throw err;
+  }
+}
