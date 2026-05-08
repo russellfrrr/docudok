@@ -223,9 +223,11 @@ export const DashboardPage = () => {
 
         {documentsQuery.data && documentsQuery.data.documents.length > 0 && (
           <div className="grid gap-3">
-            {documentsQuery.data.documents.map((document) => (
-              <Card key={document._id} className="flex transition hover:bg-accent">
-                <Link to={`/documents/${document._id}`} className="block min-w-0 flex-1">
+            {documentsQuery.data.documents.map((document) => {
+              const isReady = document.status === 'ready';
+
+              const documentContent = (
+                <>
                   <CardHeader className="flex flex-row items-center justify-between gap-4">
                     <div className="min-w-0">
                       <CardTitle className="truncate text-base">
@@ -244,25 +246,45 @@ export const DashboardPage = () => {
                   </CardHeader>
 
                   <CardContent className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>{document.totalChunks} chunks</span>
+                    <span>
+                      {isReady
+                        ? `${document.totalChunks} chunks`
+                        : document.status === 'processing'
+                          ? 'Processing document'
+                          : 'Upload failed'}
+                    </span>
                     <span>
                       {new Date(document.createdAt).toLocaleDateString()}
                     </span>
                   </CardContent>
-                </Link>
+                </>
+              );
 
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="mr-3 mt-3 text-muted-foreground hover:text-destructive"
-                  onClick={() => handleDeleteDocument(document._id)}
-                  disabled={deleteMutation.isPending}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </Card>
-            ))}
+              return (
+                <Card key={document._id} className="flex transition hover:bg-accent">
+                  {isReady ? (
+                    <Link to={`/documents/${document._id}`} className="block min-w-0 flex-1">
+                      {documentContent}
+                    </Link>
+                  ) : (
+                    <div className="block min-w-0 flex-1">
+                      {documentContent}
+                    </div>
+                  )}
+
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="mr-3 mt-3 text-muted-foreground hover:text-destructive"
+                    onClick={() => handleDeleteDocument(document._id)}
+                    disabled={deleteMutation.isPending}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </Card>
+              );
+            })}
           </div>
         )}
       </section>
