@@ -8,6 +8,7 @@ import { useDocuments } from '@/hooks/useDocuments';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AppLogo } from '@/components/layout/AppLogo';
 import {
   Card,
   CardContent,
@@ -95,14 +96,9 @@ export const DashboardPage = () => {
 
   return (
     <main className="min-h-screen bg-muted">
-      <header className="border-b bg-background">
+      <header className="border-b bg-card">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-          <div>
-            <h1 className="text-xl font-semibold text-foreground">DocuDok</h1>
-            <p className="text-sm text-muted-foreground">
-              Ask questions about your uploaded documents.
-            </p>
-          </div>
+          <AppLogo />
 
           <div className="flex items-center gap-3">
             {user && (
@@ -122,9 +118,7 @@ export const DashboardPage = () => {
       <section className="mx-auto max-w-5xl px-4 py-8">
         <div className="mb-6 flex items-center justify-between gap-4">
           <div>
-            <h2 className="text-lg font-semibold text-foreground">
-              Documents
-            </h2>
+            <h1 className="text-2xl font-semibold text-foreground">Documents</h1>
             <p className="text-sm text-muted-foreground">
               Your uploaded PDFs will appear here.
             </p>
@@ -140,7 +134,7 @@ export const DashboardPage = () => {
           </Button>
         </div>
 
-        <Card className="mb-6">
+        <Card className="mb-6 border bg-card shadow-sm">
           <CardHeader>
             <CardTitle className="text-base">Upload PDF</CardTitle>
           </CardHeader>
@@ -166,7 +160,10 @@ export const DashboardPage = () => {
                 onChange={handleFileChange}
               />
 
-              <Button type="submit" disabled={!selectedFile || uploadMutation.isPending}>
+              <Button
+                type="submit"
+                disabled={!selectedFile || uploadMutation.isPending}
+              >
                 <Upload className="h-4 w-4" />
                 {uploadMutation.isPending ? 'Uploading...' : 'Upload'}
               </Button>
@@ -192,7 +189,7 @@ export const DashboardPage = () => {
         </Card>
 
         {documentsQuery.isLoading && (
-          <Card>
+          <Card className="border bg-card shadow-sm">
             <CardContent className="py-6 text-sm text-muted-foreground">
               Loading documents...
             </CardContent>
@@ -261,9 +258,12 @@ export const DashboardPage = () => {
               );
 
               return (
-                <Card key={document._id} className="flex transition hover:bg-accent">
+              <Card key={document._id} className="flex border bg-card shadow-sm transition hover:bg-accent">
                   {isReady ? (
-                    <Link to={`/documents/${document._id}`} className="block min-w-0 flex-1">
+                    <Link
+                      to={`/documents/${document._id}`}
+                      className="block min-w-0 flex-1"
+                    >
                       {documentContent}
                     </Link>
                   ) : (
