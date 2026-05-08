@@ -16,7 +16,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-
+import { AuthLayout } from '@/components/layout/AuthLayout';
 
 export const RegisterPage = () => {
   const navigate = useNavigate();
@@ -48,14 +48,16 @@ export const RegisterPage = () => {
     registerMutation.error instanceof Error
       ? registerMutation.error.message
       : 'Register failed';
-  
+
   return (
-    <main className="flex min-h-screen items-center justify-center bg-muted px-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>
-            Create Account
-          </CardTitle>
+    <AuthLayout
+      title="Create your workspace"
+      description="Start uploading documents and asking grounded questions."
+    >
+
+      <Card className="border bg-card shadow-sm">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-xl">Create account</CardTitle>
           <CardDescription>
             Start chatting with your documents.
           </CardDescription>
@@ -116,12 +118,12 @@ export const RegisterPage = () => {
 
           <p className="mt-4 text-center text-sm text-muted-foreground">
             Already have an account?{' '}
-            <Link to="/login" className="text-foreground underline">
+            <Link to="/login" className="font-medium text-foreground underline">
               Log in
             </Link>
           </p>
         </CardContent>
       </Card>
-    </main>
+    </AuthLayout>
   );
 };
