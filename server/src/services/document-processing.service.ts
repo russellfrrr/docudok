@@ -3,7 +3,7 @@ import DocumentModel from '../models/Document';
 import DocumentChunkModel from '../models/DocumentChunk';
 import { extractTextFromPdf } from './pdf.service';    
 import { createEmbedding } from './embedding.service';
-import { saveChunkVectors } from './vector.service';
+import { deleteDocumentVectors, saveChunkVectors } from './vector.service';
 import { cleanText, splitTextIntoChunks } from '../utils/text';
 
 interface ProcessDocumentInput {
@@ -26,6 +26,13 @@ export const processDocument = async ({
     if (!document) {
       throw new Error('Document not found');
     }
+
+    await DocumentChunkModel.deleteMany({
+      documentId,
+      userId,
+    });
+
+    await deleteDocumentVectors(userId, documentId);
 
     const rawText = await extractTextFromPdf(filePath);
     const cleanedText = cleanText(rawText);
@@ -75,6 +82,8 @@ export const processDocument = async ({
       documentId,
       userId,
     });
+
+    await deleteDocumentVectors(userId, documentId);
 
     throw err;
   }

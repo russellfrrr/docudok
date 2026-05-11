@@ -8,6 +8,7 @@ import {
   uploadDocument,
   searchDocument,
   askDocument,
+  retryDocumentProcessing,
 } from '../controllers/document.controller';
 
 const docsRouter = Router();
@@ -16,6 +17,7 @@ docsRouter.use(authMiddleware);
 
 docsRouter.post('/upload', upload.single('pdf'), uploadDocument);
 docsRouter.get('/', getDocuments);
+docsRouter.post('/:id/retry', retryDocumentProcessing);
 docsRouter.post('/:id/search', searchDocument);
 docsRouter.post('/:id/ask', askDocument);
 docsRouter.get('/:id', getDocumentById);

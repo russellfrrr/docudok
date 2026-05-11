@@ -92,6 +92,57 @@ export const getDocumentById = async (req: AuthRequest, res: Response) => {
   }
 }
 
+export const retryDocumentProcessing = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Not authorized' });
+    }
+
+    const document = await DocumentModel.findOne({
+      _id: req.params.id,
+      userId: req.user.id,
+    });
+
+    if (!document) {
+      return res.status(404).json({ message: 'Document not found' });
+    }
+
+    if (document.status === 'processing') {
+      return res.status(409).json({ message: 'Document is already processing' });
+    }
+
+    if (document.status === 'ready') {
+      return res.status(400).json({ message: 'Document is already ready' });
+    }
+
+    const filePath = path.join('uploads', document.fileName);
+
+    if (!fs.existsSync(filePath)) {
+      document.status = 'failed';
+      await document.save();
+
+      return res.status(404).json({ message: 'Uploaded file not found' });
+    }
+
+    document.status = 'processing';
+    document.totalChunks = 0;
+    await document.save();
+
+    processDocument({
+      documentId: document._id.toString(),
+      userId: req.user.id,
+      filePath,
+    }).catch((err) => {
+      console.error('Retry document processing failed', err);
+    });
+
+    res.json({ document });
+  } catch (err) {
+    console.error('Retry document processing failed', err);
+    res.status(500).json({ message: 'Retry document processing failed' });
+  }
+}
+
 export const deleteDocument = async (req: AuthRequest, res: Response) => {
   try {
     if (!req.user) {
