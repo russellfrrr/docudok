@@ -9,7 +9,7 @@ import type {
 export const getDocuments = async (): Promise<DocumentsResponse> => {
   const response = await api.get<DocumentsResponse>('/documents');
   return response.data;
-}
+};
 
 export const uploadDocument = async (
   file: File,
@@ -34,7 +34,7 @@ export const uploadDocument = async (
   );
 
   return response.data;
-}
+};
 
 export const getDocumentById = async (
   documentId: string
@@ -53,8 +53,14 @@ export const askDocument = async (
   );
 
   return response.data;
-}
+};
 
 export const deleteDocument = async (documentId: string): Promise<void> => {
   await api.delete(`/documents/${documentId}`);
+};
+
+export const retryDocumentProcessing = async (documentId: string) => {
+  const response = await api.post(`/documents/${documentId}/retry`);
+
+  return response.data;
 };

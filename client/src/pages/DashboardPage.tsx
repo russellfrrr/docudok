@@ -7,11 +7,16 @@ import {
   Trash2,
   Upload,
   X,
+  RotateCcw,
 } from 'lucide-react';
 import { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
-import { uploadDocument, deleteDocument } from '@/services/document.service';
+import {
+  uploadDocument,
+  deleteDocument,
+  retryDocumentProcessing,
+} from '@/services/document.service';
 import { useAuthStore } from '@/store/auth.store';
 import { useDocuments } from '@/hooks/useDocuments';
 import { Button } from '@/components/ui/button';
@@ -60,12 +65,23 @@ export const DashboardPage = () => {
     },
   });
 
+  const retryMutation = useMutation({
+    mutationFn: retryDocumentProcessing,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['documents'] });
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: deleteDocument,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] });
     },
   });
+
+  const handleRetryDocument = (documentId: string) => {
+    retryMutation.mutate(documentId);
+  };
 
   const handleDeleteDocument = (documentId: string) => {
     const confirmed = window.confirm(
@@ -333,16 +349,31 @@ export const DashboardPage = () => {
                     </div>
                   )}
 
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="mr-3 mt-3 text-muted-foreground hover:text-destructive"
-                    onClick={() => handleDeleteDocument(document._id)}
-                    disabled={deleteMutation.isPending}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <div className="mr-3 mt-3 flex gap-1">
+                    {document.status === 'failed' && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="text-muted-foreground hover:text-foreground"
+                        onClick={() => handleRetryDocument(document._id)}
+                        disabled={retryMutation.isPending}
+                      >
+                        <RotateCcw className="h-4 w-4" />
+                      </Button>
+                    )}
+
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground hover:text-destructive"
+                      onClick={() => handleDeleteDocument(document._id)}
+                      disabled={deleteMutation.isPending}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </Card>
               );
             })}
