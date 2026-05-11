@@ -216,7 +216,7 @@ export const DocumentChatPage = () => {
           </Card>
         </aside>
 
-        <div className="flex min-h-[620px] flex-col gap-4">
+        <div className="flex min-h-[620px] flex-col">
           <Card className="flex min-h-0 flex-1 flex-col border bg-card shadow-sm">
             <CardHeader className="border-b">
               <CardTitle className="text-base">
@@ -224,145 +224,146 @@ export const DocumentChatPage = () => {
               </CardTitle>
             </CardHeader>
 
-            <CardContent className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-6">
-              {!selectedChatId && (
-                <div className="flex min-h-[360px] flex-col items-center justify-center rounded-md border bg-background p-6 text-center">
-                  <MessageSquare className="mb-3 h-8 w-8 text-muted-foreground" />
-                  <h2 className="text-base font-medium text-foreground">
-                    Ask a question about this document
-                  </h2>
-                  <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-                    Create a chat when the document is ready, then ask anything
-                    that can be answered from its contents.
-                  </p>
-                </div>
-              )}
+            <CardContent className="flex min-h-0 flex-1 flex-col p-0">
+              <div className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-6">
+                {!selectedChatId && (
+                  <div className="flex min-h-[360px] flex-col items-center justify-center rounded-md border bg-background p-6 text-center">
+                    <MessageSquare className="mb-3 h-8 w-8 text-muted-foreground" />
+                    <h2 className="text-base font-medium text-foreground">
+                      Ask a question about this document
+                    </h2>
+                    <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+                      Create a chat when the document is ready, then ask anything
+                      that can be answered from its contents.
+                    </p>
+                  </div>
+                )}
 
-              {messagesQuery.isLoading && selectedChatId && (
-                <p className="text-sm text-muted-foreground">Loading messages...</p>
-              )}
+                {messagesQuery.isLoading && selectedChatId && (
+                  <p className="text-sm text-muted-foreground">Loading messages...</p>
+                )}
 
-              {selectedChatId && messages.length === 0 && !messagesQuery.isLoading && (
-                <div className="flex min-h-[360px] flex-col items-center justify-center rounded-md border bg-background p-6 text-center">
-                  <MessageSquare className="mb-3 h-8 w-8 text-muted-foreground" />
-                  <h2 className="text-base font-medium text-foreground">
-                    Ask your first question
-                  </h2>
-                  <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-                    The assistant will answer only from the document context and
-                    show the source snippets it used.
-                  </p>
-                </div>
-              )}
+                {selectedChatId && messages.length === 0 && !messagesQuery.isLoading && (
+                  <div className="flex min-h-[360px] flex-col items-center justify-center rounded-md border bg-background p-6 text-center">
+                    <MessageSquare className="mb-3 h-8 w-8 text-muted-foreground" />
+                    <h2 className="text-base font-medium text-foreground">
+                      Ask your first question
+                    </h2>
+                    <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+                      The assistant will answer only from the document context and
+                      show the source snippets it used.
+                    </p>
+                  </div>
+                )}
 
-              {messages.map((chatMessage) => (
-                <div
-                  key={chatMessage._id}
-                  className={`flex ${
-                    chatMessage.role === 'user'
-                      ? 'justify-end'
-                      : 'justify-start'
-                  }`}
-                >
+                {messages.map((chatMessage) => (
                   <div
-                    className={`max-w-[88%] rounded-lg border p-4 ${
+                    key={chatMessage._id}
+                    className={`flex ${
                       chatMessage.role === 'user'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-background text-foreground'
+                        ? 'justify-end'
+                        : 'justify-start'
                     }`}
                   >
                     <div
-                      className={`mb-2 text-xs font-medium uppercase ${
+                      className={`max-w-[88%] rounded-lg border p-4 ${
                         chatMessage.role === 'user'
-                          ? 'text-primary-foreground/70'
-                          : 'text-muted-foreground'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-background text-foreground'
                       }`}
                     >
-                      {chatMessage.role}
-                    </div>
+                      <div
+                        className={`mb-2 text-xs font-medium uppercase ${
+                          chatMessage.role === 'user'
+                            ? 'text-primary-foreground/70'
+                            : 'text-muted-foreground'
+                        }`}
+                      >
+                        {chatMessage.role}
+                      </div>
 
-                    <p className="whitespace-pre-wrap text-sm leading-6">
-                      {chatMessage.content}
-                    </p>
+                      <p className="whitespace-pre-wrap text-sm leading-6">
+                        {chatMessage.content}
+                      </p>
 
-                    {chatMessage.role === 'assistant' &&
-                      chatMessage.sources.length > 0 && (
-                        <div className="mt-4 space-y-2 border-t pt-4">
-                          <div className="text-xs font-medium text-muted-foreground">
-                            Sources
-                          </div>
-
-                          {chatMessage.sources.map((source) => (
-                            <div
-                              key={`${chatMessage._id}-${source.chunkIndex}-${source.score}`}
-                              className="rounded-md border bg-muted/50 p-3"
-                            >
-                              <div className="mb-1 text-xs text-muted-foreground">
-                                Chunk {source.chunkIndex} - Score{' '}
-                                {source.score.toFixed(3)}
-                              </div>
-                              <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
-                                {source.chunkText}
-                              </p>
+                      {chatMessage.role === 'assistant' &&
+                        chatMessage.sources.length > 0 && (
+                          <div className="mt-4 space-y-2 border-t pt-4">
+                            <div className="text-xs font-medium text-muted-foreground">
+                              Sources
                             </div>
-                          ))}
-                        </div>
-                      )}
+
+                            {chatMessage.sources.map((source) => (
+                              <div
+                                key={`${chatMessage._id}-${source.chunkIndex}-${source.score}`}
+                                className="rounded-md border bg-muted/50 p-3"
+                              >
+                                <div className="mb-1 text-xs text-muted-foreground">
+                                  Chunk {source.chunkIndex} - Score{' '}
+                                  {source.score.toFixed(3)}
+                                </div>
+                                <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
+                                  {source.chunkText}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
 
-              {sendMessageMutation.isError && (
-                <Alert variant="destructive">
-                  <AlertDescription>
-                    {sendMessageMutation.error instanceof Error
-                      ? sendMessageMutation.error.message
-                      : 'Send message failed'}
-                  </AlertDescription>
-                </Alert>
-              )}
+                {sendMessageMutation.isError && (
+                  <Alert variant="destructive">
+                    <AlertDescription>
+                      {sendMessageMutation.error instanceof Error
+                        ? sendMessageMutation.error.message
+                        : 'Send message failed'}
+                    </AlertDescription>
+                  </Alert>
+                )}
 
-              {createChatMutation.isError && (
-                <Alert variant="destructive">
-                  <AlertDescription>
-                    {createChatMutation.error instanceof Error
-                      ? createChatMutation.error.message
-                      : 'Create chat failed'}
-                  </AlertDescription>
-                </Alert>
-              )}
-            </CardContent>
-          </Card>
+                {createChatMutation.isError && (
+                  <Alert variant="destructive">
+                    <AlertDescription>
+                      {createChatMutation.error instanceof Error
+                        ? createChatMutation.error.message
+                        : 'Create chat failed'}
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </div>
 
-          <Card className="border bg-card shadow-sm">
-            <CardContent className="pt-6">
-              <form
-                className="flex flex-col gap-3 sm:flex-row"
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  sendMessageMutation.mutate();
-                }}
-              >
-                <Input
-                  value={message}
-                  onChange={(event) => setMessage(event.target.value)}
-                  placeholder="Ask a question about this document"
-                  disabled={inputIsDisabled}
-                />
-
-                <Button
-                  type="submit"
-                  className="sm:w-fit"
-                  disabled={inputIsDisabled || !message.trim()}
+              <div className="border-t bg-background/80 p-3 sm:p-4">
+                <form
+                  className="flex flex-col gap-3 rounded-lg border bg-card p-2 sm:flex-row"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    sendMessageMutation.mutate();
+                  }}
                 >
-                  {sendMessageMutation.isPending ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Send className="h-4 w-4" />
-                  )}
-                  {sendMessageMutation.isPending ? 'Thinking...' : 'Send'}
-                </Button>
-              </form>
+                  <Input
+                    value={message}
+                    onChange={(event) => setMessage(event.target.value)}
+                    placeholder="Ask a question about this document"
+                    className="border-0 bg-transparent shadow-none focus-visible:ring-0"
+                    disabled={inputIsDisabled}
+                  />
+
+                  <Button
+                    type="submit"
+                    className="sm:w-fit"
+                    disabled={inputIsDisabled || !message.trim()}
+                  >
+                    {sendMessageMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Send className="h-4 w-4" />
+                    )}
+                    {sendMessageMutation.isPending ? 'Thinking...' : 'Send'}
+                  </Button>
+                </form>
+              </div>
             </CardContent>
           </Card>
         </div>
