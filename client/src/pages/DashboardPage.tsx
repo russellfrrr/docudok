@@ -1,4 +1,13 @@
-import { FileText, LogOut, RefreshCcw, AlertCircle, Upload, Trash2 } from 'lucide-react';
+import {
+  AlertCircle,
+  CheckCircle2,
+  FileText,
+  LogOut,
+  RefreshCcw,
+  Trash2,
+  Upload,
+  X,
+} from 'lucide-react';
 import { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
@@ -27,6 +36,14 @@ export const DashboardPage = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  const clearSelectedFile = () => {
+    setSelectedFile(null);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const uploadMutation = useMutation({
     mutationFn: async () => {
       if (!selectedFile) {
@@ -37,11 +54,7 @@ export const DashboardPage = () => {
     },
     onSuccess: () => {
       setTitle('');
-      setSelectedFile(null);
-
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+      clearSelectedFile();
 
       queryClient.invalidateQueries({ queryKey: ['documents'] });
     },
@@ -64,7 +77,7 @@ export const DashboardPage = () => {
     }
 
     deleteMutation.mutate(documentId);
-  }
+  };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -75,7 +88,7 @@ export const DashboardPage = () => {
     }
 
     setSelectedFile(file);
-  }
+  };
 
   const handleLogout = () => {
     logout();
@@ -92,7 +105,7 @@ export const DashboardPage = () => {
     }
 
     return 'border-amber-200 bg-amber-50 text-amber-700';
-  }
+  };
 
   return (
     <main className="min-h-screen bg-muted">
@@ -141,7 +154,7 @@ export const DashboardPage = () => {
 
           <CardContent>
             <form
-              className="grid gap-4 md:grid-cols-[1fr_1fr_auto]"
+              className="grid gap-4"
               onSubmit={(event) => {
                 event.preventDefault();
                 uploadMutation.mutate();
@@ -153,26 +166,71 @@ export const DashboardPage = () => {
                 onChange={(event) => setTitle(event.target.value)}
               />
 
-              <Input
-                ref={fileInputRef}
-                type="file"
-                accept="application/pdf"
-                onChange={handleFileChange}
-              />
+              <div className="rounded-lg border border-dashed bg-background p-5">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="application/pdf"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex size-10 items-center justify-center rounded-md border bg-muted">
+                      <FileText className="h-5 w-5 text-muted-foreground" />
+                    </div>
+
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-foreground">
+                        {selectedFile ? selectedFile.name : 'Choose a PDF document'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {selectedFile ? 'Ready to upload' : 'PDF files only'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      Choose file
+                    </Button>
+
+                    {selectedFile && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={clearSelectedFile}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
 
               <Button
                 type="submit"
+                className="w-fit"
                 disabled={!selectedFile || uploadMutation.isPending}
               >
                 <Upload className="h-4 w-4" />
-                {uploadMutation.isPending ? 'Uploading...' : 'Upload'}
+                {uploadMutation.isPending ? 'Uploading...' : 'Upload document'}
               </Button>
             </form>
 
-            {selectedFile && (
-              <p className="mt-3 text-sm text-muted-foreground">
-                Selected: {selectedFile.name}
-              </p>
+            {uploadMutation.isSuccess && (
+              <Alert className="mt-4">
+                <CheckCircle2 className="h-4 w-4" />
+                <AlertDescription>
+                  Document uploaded. It may take a moment to finish processing.
+                </AlertDescription>
+              </Alert>
             )}
 
             {uploadMutation.isError && (
@@ -258,7 +316,10 @@ export const DashboardPage = () => {
               );
 
               return (
-              <Card key={document._id} className="flex border bg-card shadow-sm transition hover:bg-accent">
+                <Card
+                  key={document._id}
+                  className="flex border bg-card shadow-sm transition hover:bg-accent"
+                >
                   {isReady ? (
                     <Link
                       to={`/documents/${document._id}`}
