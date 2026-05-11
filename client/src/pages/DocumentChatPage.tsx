@@ -1,7 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Loader2, Send, Plus, MessageSquare } from 'lucide-react';
+import {
+  AlertCircle,
+  ArrowLeft,
+  FileText,
+  Loader2,
+  MessageSquare,
+  Plus,
+  Send,
+} from 'lucide-react';
 import { getDocumentById } from '@/services/document.service';
 import { createChat, sendMessage } from '@/services/chat.service';
 import { useChats } from '@/hooks/useChats';
@@ -55,7 +63,7 @@ export const DocumentChatPage = () => {
       setSelectedChatId(data.chat._id);
       queryClient.invalidateQueries({ queryKey: ['chats', documentId] });
     },
-  })
+  });
 
   const sendMessageMutation = useMutation({
     mutationFn: async () => {
@@ -84,7 +92,22 @@ export const DocumentChatPage = () => {
 
   const chats: Chat[] = chatsQuery.data?.chats || [];
   const messages = messagesQuery.data?.messages || [];
-  const documentIsReady = documentQuery.data?.document.status === 'ready';
+  const document = documentQuery.data?.document;
+  const documentIsReady = document?.status === 'ready';
+  const inputIsDisabled =
+    !selectedChatId || !documentIsReady || sendMessageMutation.isPending;
+
+  const getStatusClassName = (status: string) => {
+    if (status === 'ready') {
+      return 'border-emerald-200 bg-emerald-50 text-emerald-700';
+    }
+
+    if (status === 'failed') {
+      return 'border-red-200 bg-red-50 text-red-700';
+    }
+
+    return 'border-amber-200 bg-amber-50 text-amber-700';
+  };
 
   return (
     <main className="min-h-screen bg-muted">
@@ -100,14 +123,36 @@ export const DocumentChatPage = () => {
           </Button>
         </div>
 
-        <div className="mx-auto max-w-6xl px-4 pb-4">
-          <div className="min-w-0">
-            <h1 className="truncate text-2xl font-semibold text-foreground">
-              {documentQuery.data?.document.title || 'Document'}
-            </h1>
-            <p className="text-sm capitalize text-muted-foreground">
-              {documentQuery.data?.document.status || 'loading'}
-            </p>
+        <div className="mx-auto max-w-6xl px-4 pb-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div className="min-w-0">
+              <div className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
+                <FileText className="h-4 w-4" />
+                <span className="truncate">
+                  {document?.fileName || 'Loading document...'}
+                </span>
+              </div>
+              <h1 className="truncate text-2xl font-semibold text-foreground">
+                {document?.title || 'Document'}
+              </h1>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {documentIsReady
+                  ? `${document.totalChunks} chunks indexed`
+                  : document?.status === 'processing'
+                    ? 'Processing document before chat is available'
+                    : document?.status === 'failed'
+                      ? 'Processing failed. Retry from the dashboard.'
+                      : 'Loading document details'}
+              </p>
+            </div>
+
+            <span
+              className={`w-fit rounded-md border px-2 py-1 text-xs capitalize ${
+                document ? getStatusClassName(document.status) : ''
+              }`}
+            >
+              {document?.status || 'loading'}
+            </span>
           </div>
         </div>
       </header>
@@ -117,7 +162,7 @@ export const DocumentChatPage = () => {
           <Button
             className="w-full"
             onClick={() => createChatMutation.mutate()}
-            disabled={createChatMutation.isPending}
+            disabled={!documentIsReady || createChatMutation.isPending}
           >
             {createChatMutation.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -133,6 +178,15 @@ export const DocumentChatPage = () => {
             </CardHeader>
 
             <CardContent className="space-y-2">
+              {!documentIsReady && (
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    Chat is available after the document is ready.
+                  </AlertDescription>
+                </Alert>
+              )}
+
               {chatsQuery.isLoading && (
                 <p className="text-sm text-muted-foreground">Loading chats...</p>
               )}
@@ -162,16 +216,25 @@ export const DocumentChatPage = () => {
           </Card>
         </aside>
 
-        <div className="space-y-4">
-          <Card className="border bg-card shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-base">Messages</CardTitle>
+        <div className="flex min-h-[620px] flex-col gap-4">
+          <Card className="flex min-h-0 flex-1 flex-col border bg-card shadow-sm">
+            <CardHeader className="border-b">
+              <CardTitle className="text-base">
+                {selectedChatId ? 'Document assistant' : 'Messages'}
+              </CardTitle>
             </CardHeader>
 
-            <CardContent className="space-y-4">
+            <CardContent className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-6">
               {!selectedChatId && (
-                <div className="rounded-md border bg-background p-6 text-center text-sm text-muted-foreground">
-                  Create a chat to start asking questions.
+                <div className="flex min-h-[360px] flex-col items-center justify-center rounded-md border bg-background p-6 text-center">
+                  <MessageSquare className="mb-3 h-8 w-8 text-muted-foreground" />
+                  <h2 className="text-base font-medium text-foreground">
+                    Ask a question about this document
+                  </h2>
+                  <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+                    Create a chat when the document is ready, then ask anything
+                    that can be answered from its contents.
+                  </p>
                 </div>
               )}
 
@@ -180,50 +243,72 @@ export const DocumentChatPage = () => {
               )}
 
               {selectedChatId && messages.length === 0 && !messagesQuery.isLoading && (
-                <div className="rounded-md border bg-background p-6 text-center text-sm text-muted-foreground">
-                  Ask your first question about this document.
+                <div className="flex min-h-[360px] flex-col items-center justify-center rounded-md border bg-background p-6 text-center">
+                  <MessageSquare className="mb-3 h-8 w-8 text-muted-foreground" />
+                  <h2 className="text-base font-medium text-foreground">
+                    Ask your first question
+                  </h2>
+                  <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+                    The assistant will answer only from the document context and
+                    show the source snippets it used.
+                  </p>
                 </div>
               )}
 
               {messages.map((chatMessage) => (
                 <div
                   key={chatMessage._id}
-                  className={`rounded-md border p-4 ${
+                  className={`flex ${
                     chatMessage.role === 'user'
-                      ? 'ml-auto max-w-[85%] bg-background'
-                      : 'mr-auto max-w-[85%] bg-secondary'
+                      ? 'justify-end'
+                      : 'justify-start'
                   }`}
                 >
-                  <div className="mb-2 text-xs font-medium uppercase text-muted-foreground">
-                    {chatMessage.role}
-                  </div>
-
-                  <p className="whitespace-pre-wrap text-sm leading-6 text-foreground">
-                    {chatMessage.content}
-                  </p>
-
-                  {chatMessage.sources.length > 0 && (
-                    <div className="mt-4 space-y-2">
-                      <div className="text-xs font-medium text-muted-foreground">
-                        Sources
-                      </div>
-
-                      {chatMessage.sources.map((source) => (
-                        <div
-                          key={`${chatMessage._id}-${source.chunkIndex}-${source.score}`}
-                          className="rounded-md border bg-background p-3"
-                        >
-                          <div className="mb-1 text-xs text-muted-foreground">
-                            Chunk {source.chunkIndex} - Score{' '}
-                            {source.score.toFixed(3)}
-                          </div>
-                          <p className="line-clamp-3 text-sm text-muted-foreground">
-                            {source.chunkText}
-                          </p>
-                        </div>
-                      ))}
+                  <div
+                    className={`max-w-[88%] rounded-lg border p-4 ${
+                      chatMessage.role === 'user'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-background text-foreground'
+                    }`}
+                  >
+                    <div
+                      className={`mb-2 text-xs font-medium uppercase ${
+                        chatMessage.role === 'user'
+                          ? 'text-primary-foreground/70'
+                          : 'text-muted-foreground'
+                      }`}
+                    >
+                      {chatMessage.role}
                     </div>
-                  )}
+
+                    <p className="whitespace-pre-wrap text-sm leading-6">
+                      {chatMessage.content}
+                    </p>
+
+                    {chatMessage.role === 'assistant' &&
+                      chatMessage.sources.length > 0 && (
+                        <div className="mt-4 space-y-2 border-t pt-4">
+                          <div className="text-xs font-medium text-muted-foreground">
+                            Sources
+                          </div>
+
+                          {chatMessage.sources.map((source) => (
+                            <div
+                              key={`${chatMessage._id}-${source.chunkIndex}-${source.score}`}
+                              className="rounded-md border bg-muted/50 p-3"
+                            >
+                              <div className="mb-1 text-xs text-muted-foreground">
+                                Chunk {source.chunkIndex} - Score{' '}
+                                {source.score.toFixed(3)}
+                              </div>
+                              <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
+                                {source.chunkText}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                  </div>
                 </div>
               ))}
 
@@ -252,7 +337,7 @@ export const DocumentChatPage = () => {
           <Card className="border bg-card shadow-sm">
             <CardContent className="pt-6">
               <form
-                className="flex gap-3"
+                className="flex flex-col gap-3 sm:flex-row"
                 onSubmit={(event) => {
                   event.preventDefault();
                   sendMessageMutation.mutate();
@@ -262,19 +347,20 @@ export const DocumentChatPage = () => {
                   value={message}
                   onChange={(event) => setMessage(event.target.value)}
                   placeholder="Ask a question about this document"
-                  disabled={!selectedChatId || !documentIsReady || sendMessageMutation.isPending}
+                  disabled={inputIsDisabled}
                 />
 
                 <Button
                   type="submit"
-                  disabled={!selectedChatId || !documentIsReady || sendMessageMutation.isPending}
+                  className="sm:w-fit"
+                  disabled={inputIsDisabled || !message.trim()}
                 >
                   {sendMessageMutation.isPending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     <Send className="h-4 w-4" />
                   )}
-                  Send
+                  {sendMessageMutation.isPending ? 'Thinking...' : 'Send'}
                 </Button>
               </form>
             </CardContent>
@@ -283,4 +369,4 @@ export const DocumentChatPage = () => {
       </section>
     </main>
   );
-}
+};
