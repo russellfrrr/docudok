@@ -36,7 +36,7 @@ export const processDocument = async ({
 
     const rawText = await extractTextFromPdf(filePath);
     const cleanedText = cleanText(rawText);
-    const chunks = splitTextIntoChunks(cleanedText);
+    const chunks = await splitTextIntoChunks(cleanedText);
 
     const chunkDocuments = chunks.map((chunkText, index) => {
       return {
