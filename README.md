@@ -1,3 +1,295 @@
 # DocuDok
 
-A web app for chatting with uploaded documents using RAG. wip.
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB)
+![Node.js](https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-47A248?logo=mongodb&logoColor=white)
+![Qdrant](https://img.shields.io/badge/Qdrant-DC244C?logo=qdrant&logoColor=white)
+
+> A personal learning project exploring RAG-powered web applications.
+> Built mostly out of curiosity, obsession, and the desire to understand how modern AI apps actually work under the hood.
+
+**MVP Status:** Working document upload, RAG processing, vector search, and document chat.
+
+**Main Learning Goal:** The RAG Magic. That's it.
+
+---
+
+## What Is This?
+
+DocuDok is my sandbox for experimenting with:
+
+- Retrieval-Augmented Generation (RAG)
+- Vector search and embeddings
+- Full-stack TypeScript workflows
+- Advanced MERN architecture
+- AI-assisted product design
+- Real-world SaaS patterns
+- Modern UI/UX architecture
+
+Right now, it is mainly a learning/passion project.
+
+The current app lets users upload PDF documents, process them into chunks, store embeddings in a vector database, and chat with the document using retrieved context.
+
+Long term, I would like to evolve this into something more production-ready and potentially turn it into a small SaaS product.
+
+So expect:
+
+- random architecture changes
+- questionable commits at 2AM
+- overengineering
+- underengineering
+- and occasional moments of accidental genius
+
+---
+
+## Tech Stack
+
+- **Frontend:** React + TypeScript + Vite
+- **Backend:** Node.js + Express + TypeScript
+- **Database:** MongoDB + Mongoose
+- **AI / RAG:** OpenAI-compatible chat + embeddings, LangChain text splitters
+- **Vector DB:** Qdrant
+- **File Uploads:** Multer
+- **PDF Parsing:** pdf-parse
+- **Auth:** JWT
+- **Styling:** Tailwind CSS, shadcn/Radix-style components
+- **Client State/Data:** TanStack Query, Zustand, Axios
+- **UI Details:** Lucide icons, Motion
+
+---
+
+## Features
+
+- [x] Register/login authentication
+- [x] JWT-protected routes
+- [x] PDF upload
+- [x] Background document processing
+- [x] PDF text extraction
+- [x] Text cleanup and chunking
+- [x] LangChain-powered text splitting
+- [x] Embedding generation
+- [x] Vector storage with Qdrant
+- [x] Semantic search
+- [x] Context-aware document chat
+- [x] Source snippets
+- [x] Saved chat history
+- [x] Delete documents and related data
+- [x] Retry failed document processing
+- [ ] Cleaner source snippet UI
+- [ ] Streaming responses
+- [ ] OAuth login
+- [ ] Multi-file or workspace support
+- [ ] Billing/subscriptions
+- [ ] Production deployment
+- [ ] Whatever future me decides to obsess over next
+
+---
+
+## Why I Built This
+
+Honestly?
+
+I was bored af and ended up falling into the RAG rabbit hole.
+
+The whole idea of giving LLMs actual context instead of letting them hallucinate and telling me that the world is ending is so fuckin interesting to me. Once I started learning how retrival pipelines, embeddings, chunking, vector dbs, and context injection worked together, I got addicted.
+
+This repo is my attempt to:
+
+- build something while learning
+- break things intentionally
+- understand AI systems much MUCH more BETTER
+- experiment with architectures and workflows
+
+
+If it breaks, that is part of the lore.
+
+---
+
+## How The RAG Pipeline Works
+
+```txt
+PDF Upload
+   -> Extract text
+   -> Clean messy PDF text
+   -> Split text into chunks
+   -> Generate embeddings
+   -> Store document data in MongoDB
+   -> Store vectors in Qdrant
+   -> Embed the user's question
+   -> Retrieve relevant chunks
+   -> Send context + question to the LLM
+   -> Return answer with sources
+```
+
+The main goal of this project is to understand every part of that flow instead of treating RAG like a magic black box.
+
+---
+
+## Project Structure
+
+```txt
+docudok/
+  client/
+    src/
+      components/
+      pages/
+      services/
+      hooks/
+      store/
+      types/
+      App.tsx
+      main.tsx
+
+  server/
+    src/
+      config/
+      controllers/
+      middleware/
+      models/
+      routes/
+      services/
+      utils/
+      app.ts
+      server.ts
+```
+
+---
+
+## Local Setup
+
+### 1. Clone The Repo
+
+```bash
+git clone https://github.com/yourname/docudok.git
+cd docudok
+```
+
+### 2. Install Dependencies
+
+```bash
+cd server
+npm install
+
+cd ../client
+npm install
+```
+
+### 3. Add Environment Variables
+
+Create `server/.env`:
+
+```env
+PORT=5000
+MONGO_URI=mongodb://localhost:27017/docudok
+JWT_SECRET=your_jwt_secret
+
+OPENAI_API_KEY=your_api_key
+OPENAI_BASE_URL=
+EMBEDDING_MODEL=text-embedding-3-small
+EMBEDDING_DIMENSIONS=1536
+CHAT_MODEL=gpt-4o-mini
+
+QDRANT_URL=http://localhost:6333
+QDRANT_API_KEY=
+QDRANT_COLLECTION=document_chunks
+```
+
+Create `client/.env`:
+
+```env
+VITE_API_URL=http://localhost:5000/api/v1
+```
+
+### 4. Start Qdrant
+
+```bash
+docker run -p 6333:6333 qdrant/qdrant
+```
+
+### 5. Run The Backend
+
+```bash
+cd server
+npm run dev
+```
+
+### 6. Run The Frontend
+
+```bash
+cd client
+npm run dev
+```
+
+Open:
+
+```txt
+http://localhost:5173
+```
+
+---
+
+## API Routes
+
+### Auth
+
+```txt
+POST /api/v1/auth/register
+POST /api/v1/auth/login
+GET  /api/v1/auth/me
+```
+
+### Documents
+
+```txt
+POST   /api/v1/documents/upload
+GET    /api/v1/documents
+GET    /api/v1/documents/:id
+POST   /api/v1/documents/:id/retry
+POST   /api/v1/documents/:id/search
+POST   /api/v1/documents/:id/ask
+DELETE /api/v1/documents/:id
+```
+
+### Chats
+
+```txt
+POST /api/v1/chats
+GET  /api/v1/chats/:documentId
+GET  /api/v1/chats/:chatId/messages
+POST /api/v1/chats/:chatId/messages
+```
+
+---
+
+## Build
+
+Backend:
+
+```bash
+cd server
+npm run build
+```
+
+Frontend:
+
+```bash
+cd client
+npm run build
+```
+
+---
+
+## Notes To Future Me
+
+- Existing documents need to be retried or re-uploaded when chunking logic changes.
+- Source scores are vector similarity scores, not grades.
+- Better chunks usually matter more than bigger prompts.
+- Retrieval quality depends heavily on extraction quality, cleaning, chunking, and embedding model choice.
+- Do not pretend this is production-ready until deployment, security, logging, and file handling are cleaned up properly.
+
+---
+
+## Current Status
+
+Still building, still learning, still breaking things in useful ways.
