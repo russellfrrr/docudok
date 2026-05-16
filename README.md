@@ -193,6 +193,8 @@ CHAT_MODEL=gpt-4o-mini
 QDRANT_URL=http://localhost:6333
 QDRANT_API_KEY=
 QDRANT_COLLECTION=document_chunks
+
+RETRIEVAL_DEBUG=false
 ```
 
 Create `client/.env`:
@@ -201,10 +203,10 @@ Create `client/.env`:
 VITE_API_URL=http://localhost:5000/api/v1
 ```
 
-### 4. Start Qdrant
+### 4. Start MongoDB And Qdrant
 
 ```bash
-docker run -p 6333:6333 qdrant/qdrant
+docker compose up -d
 ```
 
 ### 5. Run The Backend
@@ -284,6 +286,7 @@ npm run build
 
 - Existing documents need to be retried or re-uploaded when chunking logic changes.
 - Source scores are vector similarity scores, not grades.
+- Set `RETRIEVAL_DEBUG=true` when you want to inspect candidate and selected chunk scores in the server logs.
 - Better chunks usually matter more than bigger prompts.
 - Retrieval quality depends heavily on extraction quality, cleaning, chunking, and embedding model choice.
 - Do not pretend this is production-ready until deployment, security, logging, and file handling are cleaned up properly.
