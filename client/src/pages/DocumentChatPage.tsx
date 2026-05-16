@@ -293,14 +293,13 @@ export const DocumentChatPage = () => {
                               Sources
                             </div>
 
-                            {chatMessage.sources.map((source) => (
+                            {chatMessage.sources.map((source, index) => (
                               <div
                                 key={`${chatMessage._id}-${source.chunkIndex}-${source.score}`}
                                 className="rounded-md border bg-muted/50 p-3"
                               >
                                 <div className="mb-1 text-xs text-muted-foreground">
-                                  Chunk {source.chunkIndex} - Score{' '}
-                                  {source.score.toFixed(3)}
+                                  Source {index + 1} · Chunk {source.chunkIndex}
                                 </div>
                                 <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
                                   {source.chunkText}
