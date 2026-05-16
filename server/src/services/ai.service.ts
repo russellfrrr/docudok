@@ -14,7 +14,12 @@ export const generateAnswer = async (
 
   const context = sources
     .map((source, index) => {
-      return `Source ${index + 1}:\n${source.chunkText}`;
+      return [
+        `Source ${index + 1}`,
+        `Chunk: ${source.chunkIndex}`,
+        `Similarity score: ${source.score.toFixed(3)}`,
+        `Text:\n${source.chunkText}`,
+      ].join('\n');
     })
     .join('\n\n');
 
@@ -28,7 +33,7 @@ export const generateAnswer = async (
         },
         {
           role: 'user',
-          content: `Document context: \n\n${context}\n\nQuestion\n${question}`,
+          content: `Document context:\n\n${context}\n\nQuestion:\n${question}`,
         },
       ],
       temperature: 0.2,
