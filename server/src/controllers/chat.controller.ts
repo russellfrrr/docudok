@@ -3,9 +3,8 @@ import { AuthRequest } from '../middleware/auth.middleware';
 import ChatModel from '../models/Chat';
 import MessageModel from '../models/Message';
 import DocumentModel from '../models/Document';
-import { createEmbedding } from '../services/embedding.service';
-import { searchDocumentChunks } from '../services/vector.service'; 
 import { generateAnswer } from '../services/ai.service';
+import { retrieveDocumentSources } from '../services/retrieval.service';
 
 export const createChat = async (req: AuthRequest, res: Response) => {
   try {
@@ -98,14 +97,11 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
       sources: [],
     });
 
-    const questionVector = await createEmbedding(content);
-
-    const sources = await searchDocumentChunks(
-      questionVector,
-      req.user.id,
-      document._id.toString(),
-      5
-    );
+    const sources = await retrieveDocumentSources({
+      question: content,
+      userId: req.user.id,
+      documentId: document._id.toString(),
+    });
 
     const answer = await generateAnswer(content, sources);
 
