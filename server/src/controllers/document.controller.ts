@@ -6,13 +6,10 @@ import DocumentModel from '../models/Document';
 import DocumentChunkModel from '../models/DocumentChunk';
 import ChatModel from '../models/Chat';
 import MessageModel from '../models/Message';
-import { createEmbedding } from '../services/embedding.service';
-import {
-  deleteDocumentVectors,
-  searchDocumentChunks,
-} from '../services/vector.service';
+import { deleteDocumentVectors } from '../services/vector.service';
 import { generateAnswer } from '../services/ai.service';
 import { processDocument } from '../services/document-processing.service';
+import { retrieveDocumentSources } from '../services/retrieval.service';
 
 
 export const uploadDocument = async (req: AuthRequest, res: Response) => {
@@ -218,14 +215,11 @@ export const searchDocument = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ message: 'Document not found or not ready '});
     }
 
-    const questionVector = await createEmbedding(question);
-
-    const sources = await searchDocumentChunks(
-      questionVector,
-      req.user.id,
-      document._id.toString(),
-      5
-    );
+    const sources = await retrieveDocumentSources({
+      question,
+      userId: req.user.id,
+      documentId: document._id.toString(),
+    });
 
     res.json({ sources });
   } catch (err) {
@@ -256,14 +250,11 @@ export const askDocument = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ message: 'Document not found or not ready' });
     }
 
-    const questionVector = await createEmbedding(question);
-
-    const sources = await searchDocumentChunks(
-      questionVector,
-      req.user.id,
-      document._id.toString(),
-      5
-    );
+    const sources = await retrieveDocumentSources({
+      question,
+      userId: req.user.id,
+      documentId: document._id.toString(),
+    });
 
     const answer = await generateAnswer(question, sources);
 
