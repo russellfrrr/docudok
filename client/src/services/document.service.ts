@@ -3,6 +3,7 @@ import type {
   DocumentsResponse,
   UploadDocumentResponse,
   DocumentResponse,
+  DocumentChunksResponse,
   AskDocumentResponse,
 } from '@/types/document';
 
@@ -40,6 +41,16 @@ export const getDocumentById = async (
   documentId: string
 ): Promise<DocumentResponse> => {
   const response = await api.get<DocumentResponse>(`/documents/${documentId}`);
+  return response.data;
+};
+
+export const getDocumentChunks = async (
+  documentId: string
+): Promise<DocumentChunksResponse> => {
+  const response = await api.get<DocumentChunksResponse>(
+    `/documents/${documentId}/chunks`
+  );
+
   return response.data;
 };
 

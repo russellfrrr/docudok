@@ -23,6 +23,19 @@ export interface DocumentResponse {
   document: Document;
 }
 
+export interface DocumentChunk {
+  _id: string;
+  userId: string;
+  documentId: string;
+  chunkText: string;
+  chunkIndex: number;
+  createdAt: string;
+}
+
+export interface DocumentChunksResponse {
+  chunks: DocumentChunk[];
+}
+
 export interface SourceSnippet {
   chunkText: string;
   chunkIndex: number;
