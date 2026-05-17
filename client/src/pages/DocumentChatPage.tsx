@@ -414,10 +414,16 @@ export const DocumentChatPage = () => {
                     key={chunk._id}
                     className="rounded-md border bg-background p-4"
                   >
-                    <div className="mb-2 text-xs font-medium text-muted-foreground">
-                      Chunk {chunk.chunkIndex}
+                    <div className="mb-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                      <span className="font-medium text-foreground">
+                        Chunk {chunk.chunkIndex}
+                      </span>
+                      <span>{chunk.chunkText.length} characters</span>
+                      <span>
+                        Saved {new Date(chunk.createdAt).toLocaleDateString()}
+                      </span>
                     </div>
-                    <p className="whitespace-pre-wrap text-sm leading-6 text-foreground">
+                    <p className="line-clamp-6 whitespace-pre-wrap text-sm leading-6 text-foreground">
                       {chunk.chunkText}
                     </p>
                   </div>
