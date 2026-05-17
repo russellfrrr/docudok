@@ -73,6 +73,8 @@ So expect:
 - [x] Semantic search
 - [x] Context-aware document chat
 - [x] Source snippets
+- [x] Chunk inspector
+- [x] Retrieval playground for testing search quality
 - [x] Saved chat history
 - [x] Delete documents and related data
 - [x] Retry failed document processing
@@ -118,6 +120,7 @@ PDF Upload
    -> Store vectors in Qdrant
    -> Embed the user's question
    -> Retrieve relevant chunks
+   -> Inspect retrieval behavior while debugging
    -> Send context + question to the LLM
    -> Return answer with sources
 ```
@@ -287,6 +290,7 @@ npm run build
 - Existing documents need to be retried or re-uploaded when chunking logic changes.
 - Source scores are vector similarity scores, not grades.
 - Set `RETRIEVAL_DEBUG=true` when you want to inspect candidate and selected chunk scores in the server logs.
+- Use the chunk inspector when retrieval feels weird. Bad answers often start with bad chunks, not bad models.
 - Better chunks usually matter more than bigger prompts.
 - Retrieval quality depends heavily on extraction quality, cleaning, chunking, and embedding model choice.
 - Do not pretend this is production-ready until deployment, security, logging, and file handling are cleaned up properly.
