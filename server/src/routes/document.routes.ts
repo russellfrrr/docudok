@@ -4,6 +4,7 @@ import { upload } from '../middleware/upload.middleware';
 import {
   deleteDocument,
   getDocumentById,
+  getDocumentChunks,
   getDocuments,
   uploadDocument,
   searchDocument,
@@ -20,6 +21,7 @@ docsRouter.get('/', getDocuments);
 docsRouter.post('/:id/retry', retryDocumentProcessing);
 docsRouter.post('/:id/search', searchDocument);
 docsRouter.post('/:id/ask', askDocument);
+docsRouter.get('/:id/chunks', getDocumentChunks);
 docsRouter.get('/:id', getDocumentById);
 docsRouter.delete('/:id', deleteDocument);
 

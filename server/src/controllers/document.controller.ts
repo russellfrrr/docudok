@@ -89,6 +89,33 @@ export const getDocumentById = async (req: AuthRequest, res: Response) => {
   }
 }
 
+export const getDocumentChunks = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Not authorized' });
+    }
+
+    const document = await DocumentModel.findOne({
+      _id: req.params.id,
+      userId: req.user.id,
+    });
+
+    if (!document) {
+      return res.status(404).json({ message: 'Document not found' });
+    }
+
+    const chunks = await DocumentChunkModel.find({
+      documentId: document._id,
+      userId: req.user.id,
+    }).sort({ chunkIndex: 1 });
+
+    res.json({ chunks });
+  } catch (err) {
+    console.error('Get document chunks failed', err);
+    res.status(500).json({ message: 'Get document chunks failed' });
+  }
+}
+
 export const retryDocumentProcessing = async (req: AuthRequest, res: Response) => {
   try {
     if (!req.user) {
