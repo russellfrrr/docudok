@@ -8,9 +8,10 @@ import {
   Loader2,
   MessageSquare,
   Plus,
+  Search,
   Send,
 } from 'lucide-react';
-import { getDocumentById } from '@/services/document.service';
+import { getDocumentById, searchDocument } from '@/services/document.service';
 import { createChat, sendMessage } from '@/services/chat.service';
 import { useChats } from '@/hooks/useChats';
 import { useDocumentChunks } from '@/hooks/useDocumentChunks';
@@ -34,6 +35,7 @@ export const DocumentChatPage = () => {
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [message, setMessage] = useState('');
   const [activeView, setActiveView] = useState<'chat' | 'chunks'>('chat');
+  const [debugQuestion, setDebugQuestion] = useState('');
 
   const documentQuery = useQuery({
     queryKey: ['document', documentId],
@@ -86,6 +88,20 @@ export const DocumentChatPage = () => {
     onSuccess: () => {
       setMessage('');
       queryClient.invalidateQueries({ queryKey: ['messages', selectedChatId] });
+    },
+  });
+
+  const searchMutation = useMutation({
+    mutationFn: async () => {
+      if (!documentId) {
+        throw new Error('Document ID is missing');
+      }
+
+      if (!debugQuestion.trim()) {
+        throw new Error('Debug question is required');
+      }
+
+      return searchDocument(documentId, debugQuestion.trim());
     },
   });
 
@@ -393,6 +409,80 @@ export const DocumentChatPage = () => {
             </CardContent>
             ) : (
               <CardContent className="flex-1 space-y-3 overflow-y-auto p-4 sm:p-6">
+                <form
+                  className="rounded-md border bg-background p-4"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    searchMutation.mutate();
+                  }}
+                >
+                  <div className="mb-3">
+                    <h3 className="text-sm font-medium text-foreground">
+                      Test retrieval
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      Ask a question to see which source chunks the backend picks.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                    <Input
+                      value={debugQuestion}
+                      onChange={(event) => setDebugQuestion(event.target.value)}
+                      placeholder="Example: What is this document about?"
+                      disabled={searchMutation.isPending || !documentIsReady}
+                    />
+                    <Button
+                      type="submit"
+                      className="sm:w-fit"
+                      disabled={
+                        searchMutation.isPending ||
+                        !documentIsReady ||
+                        !debugQuestion.trim()
+                      }
+                    >
+                      {searchMutation.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Search className="h-4 w-4" />
+                      )}
+                      Test
+                    </Button>
+                  </div>
+                </form>
+
+                {searchMutation.isError && (
+                  <Alert variant="destructive">
+                    <AlertDescription>
+                      {searchMutation.error instanceof Error
+                        ? searchMutation.error.message
+                        : 'Search failed'}
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                {searchMutation.data && (
+                  <div className="space-y-2 rounded-md border bg-background p-4">
+                    <div className="text-sm font-medium text-foreground">
+                      Retrieved sources
+                    </div>
+                    {searchMutation.data.sources.map((source, index) => (
+                      <div
+                        key={`${source.chunkIndex}-${source.score}`}
+                        className="rounded-md border bg-muted/50 p-3"
+                      >
+                        <div className="mb-1 text-xs text-muted-foreground">
+                          Source {index + 1} · Chunk {source.chunkIndex} · Score{' '}
+                          {source.score.toFixed(3)}
+                        </div>
+                        <p className="line-clamp-4 text-sm leading-6 text-muted-foreground">
+                          {source.chunkText}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 {chunksQuery.isLoading && (
                   <p className="text-sm text-muted-foreground">Loading chunks...</p>
                 )}
