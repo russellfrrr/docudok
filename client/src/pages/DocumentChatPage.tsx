@@ -13,6 +13,7 @@ import {
 import { getDocumentById } from '@/services/document.service';
 import { createChat, sendMessage } from '@/services/chat.service';
 import { useChats } from '@/hooks/useChats';
+import { useDocumentChunks } from '@/hooks/useDocumentChunks';
 import { useMessages } from '@/hooks/useMessages';
 import type { Chat } from '@/types/chat';
 import { Button } from '@/components/ui/button';
@@ -32,6 +33,7 @@ export const DocumentChatPage = () => {
 
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [message, setMessage] = useState('');
+  const [activeView, setActiveView] = useState<'chat' | 'chunks'>('chat');
 
   const documentQuery = useQuery({
     queryKey: ['document', documentId],
@@ -41,6 +43,7 @@ export const DocumentChatPage = () => {
 
   const chatsQuery = useChats(documentId);
   const messagesQuery = useMessages(selectedChatId);
+  const chunksQuery = useDocumentChunks(documentId, activeView === 'chunks');
 
   useEffect(() => {
     if (!selectedChatId && chatsQuery.data?.chats.length) {
@@ -218,13 +221,37 @@ export const DocumentChatPage = () => {
 
         <div className="flex min-h-[620px] flex-col">
           <Card className="flex min-h-0 flex-1 flex-col border bg-card shadow-sm">
-            <CardHeader className="border-b">
+            <CardHeader className="flex flex-row items-center justify-between gap-3 border-b">
               <CardTitle className="text-base">
-                {selectedChatId ? 'Document assistant' : 'Messages'}
+                {activeView === 'chat'
+                  ? selectedChatId
+                    ? 'Document assistant'
+                    : 'Messages'
+                  : 'Chunk inspector'}
               </CardTitle>
+
+              <div className="flex rounded-md border bg-background p-1">
+                <Button
+                  type="button"
+                  variant={activeView === 'chat' ? 'secondary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setActiveView('chat')}
+                >
+                  Chat
+                </Button>
+                <Button
+                  type="button"
+                  variant={activeView === 'chunks' ? 'secondary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setActiveView('chunks')}
+                >
+                  Chunks
+                </Button>
+              </div>
             </CardHeader>
 
-            <CardContent className="flex min-h-0 flex-1 flex-col p-0">
+            {activeView === 'chat' ? (
+              <CardContent className="flex min-h-0 flex-1 flex-col p-0">
               <div className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-6">
                 {!selectedChatId && (
                   <div className="flex min-h-[360px] flex-col items-center justify-center rounded-md border bg-background p-6 text-center">
@@ -364,6 +391,39 @@ export const DocumentChatPage = () => {
                 </form>
               </div>
             </CardContent>
+            ) : (
+              <CardContent className="flex-1 space-y-3 overflow-y-auto p-4 sm:p-6">
+                {chunksQuery.isLoading && (
+                  <p className="text-sm text-muted-foreground">Loading chunks...</p>
+                )}
+
+                {chunksQuery.isError && (
+                  <Alert variant="destructive">
+                    <AlertDescription>Failed to load chunks.</AlertDescription>
+                  </Alert>
+                )}
+
+                {chunksQuery.data?.chunks.length === 0 && (
+                  <div className="rounded-md border bg-background p-6 text-center text-sm text-muted-foreground">
+                    No chunks saved for this document yet.
+                  </div>
+                )}
+
+                {chunksQuery.data?.chunks.map((chunk) => (
+                  <div
+                    key={chunk._id}
+                    className="rounded-md border bg-background p-4"
+                  >
+                    <div className="mb-2 text-xs font-medium text-muted-foreground">
+                      Chunk {chunk.chunkIndex}
+                    </div>
+                    <p className="whitespace-pre-wrap text-sm leading-6 text-foreground">
+                      {chunk.chunkText}
+                    </p>
+                  </div>
+                ))}
+              </CardContent>
+            )}
           </Card>
         </div>
       </section>
