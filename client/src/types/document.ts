@@ -50,3 +50,7 @@ export interface AskDocumentResponse {
   answer: string;
   sources: SourceSnippet[];
 }
+
+export interface SearchDocumentResponse {
+  sources: SourceSnippet[];
+}

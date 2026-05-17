@@ -5,6 +5,7 @@ import type {
   DocumentResponse,
   DocumentChunksResponse,
   AskDocumentResponse,
+  SearchDocumentResponse,
 } from '@/types/document';
 
 export const getDocuments = async (): Promise<DocumentsResponse> => {
@@ -60,6 +61,18 @@ export const askDocument = async (
 ): Promise<AskDocumentResponse> => {
   const response = await api.post<AskDocumentResponse>(
     `/documents/${documentId}/ask`,
+    { question }
+  );
+
+  return response.data;
+};
+
+export const searchDocument = async (
+  documentId: string,
+  question: string
+): Promise<SearchDocumentResponse> => {
+  const response = await api.post<SearchDocumentResponse>(
+    `/documents/${documentId}/search`,
     { question }
   );
 
