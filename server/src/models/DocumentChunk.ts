@@ -33,6 +33,8 @@ const documentChunkSchema = new Schema<IDocumentChunk>({
   },
 });
 
+documentChunkSchema.index({ userId: 1, documentId: 1, chunkIndex: 1 });
+
 const DocumentChunkModel = mongoose.model<IDocumentChunk>(
   'DocumentChunk',
   documentChunkSchema

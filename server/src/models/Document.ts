@@ -39,6 +39,9 @@ const documentSchema = new Schema<IDocument>({
   },
 });
 
+documentSchema.index({ userId: 1, createdAt: -1 });
+documentSchema.index({ userId: 1, status: 1 });
+
 const DocumentModel = mongoose.model<IDocument>('Document', documentSchema);
 
 export default DocumentModel;
