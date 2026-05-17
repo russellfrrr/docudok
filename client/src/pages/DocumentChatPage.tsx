@@ -128,6 +128,18 @@ export const DocumentChatPage = () => {
     return 'border-amber-200 bg-amber-50 text-amber-700';
   };
 
+  const getScoreLabel = (score: number) => {
+    if (score >= 0.75) {
+      return 'strong match';
+    }
+
+    if (score >= 0.5) {
+      return 'possible match';
+    }
+
+    return 'weak match';
+  };
+
   return (
     <main className="min-h-screen bg-muted">
       <header className="border-b bg-card">
@@ -473,7 +485,7 @@ export const DocumentChatPage = () => {
                       >
                         <div className="mb-1 text-xs text-muted-foreground">
                           Source {index + 1} · Chunk {source.chunkIndex} · Score{' '}
-                          {source.score.toFixed(3)}
+                          {source.score.toFixed(3)} · {getScoreLabel(source.score)}
                         </div>
                         <p className="line-clamp-4 text-sm leading-6 text-muted-foreground">
                           {source.chunkText}
