@@ -199,6 +199,10 @@ QDRANT_API_KEY=
 QDRANT_COLLECTION=document_chunks
 
 RETRIEVAL_DEBUG=false
+RETRIEVAL_MIN_SOURCES=3
+RETRIEVAL_SOURCE_LIMIT=5
+RETRIEVAL_CANDIDATE_LIMIT=12
+RETRIEVAL_SCORE_CUTOFF=0.7
 ```
 
 Create `client/.env`:
@@ -292,6 +296,7 @@ npm run build
 - Source scores are vector similarity scores, not grades.
 - Set `CORS_ORIGIN` to your deployed frontend URL before shipping the API anywhere public.
 - Set `RETRIEVAL_DEBUG=true` when you want to inspect candidate and selected chunk scores in the server logs.
+- Tune `RETRIEVAL_CANDIDATE_LIMIT` and `RETRIEVAL_SCORE_CUTOFF` when experimenting with retrieval quality.
 - Use the chunk inspector when retrieval feels weird. Bad answers often start with bad chunks, not bad models.
 - Better chunks usually matter more than bigger prompts.
 - Retrieval quality depends heavily on extraction quality, cleaning, chunking, and embedding model choice.
