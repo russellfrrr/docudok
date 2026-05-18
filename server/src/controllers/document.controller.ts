@@ -109,7 +109,18 @@ export const getDocumentChunks = async (req: AuthRequest, res: Response) => {
       userId: req.user.id,
     }).sort({ chunkIndex: 1 });
 
-    res.json({ chunks });
+    const totalCharacters = chunks.reduce((total, chunk) => {
+      return total + chunk.chunkText.length;
+    }, 0);
+
+    const stats = {
+      totalChunks: chunks.length,
+      totalCharacters,
+      averageChunkLength:
+        chunks.length > 0 ? Math.round(totalCharacters / chunks.length) : 0,
+    };
+
+    res.json({ chunks, stats });
   } catch (err) {
     console.error('Get document chunks failed', err);
     res.status(500).json({ message: 'Get document chunks failed' });
