@@ -490,20 +490,29 @@ export const DocumentChatPage = () => {
                     <div className="text-sm font-medium text-foreground">
                       Retrieved sources
                     </div>
-                    {searchMutation.data.sources.map((source, index) => (
-                      <div
-                        key={`${source.chunkIndex}-${source.score}`}
-                        className="rounded-md border bg-muted/50 p-3"
-                      >
-                        <div className="mb-1 text-xs text-muted-foreground">
-                          Source {index + 1} · Chunk {source.chunkIndex} · Score{' '}
-                          {source.score.toFixed(3)} · {getScoreLabel(source.score)}
+
+                    {searchMutation.data.sources.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">
+                        No sources matched this question. Try rephrasing it or
+                        checking whether the document chunks contain the answer.
+                      </p>
+                    ) : (
+                      searchMutation.data.sources.map((source, index) => (
+                        <div
+                          key={`${source.chunkIndex}-${source.score}`}
+                          className="rounded-md border bg-muted/50 p-3"
+                        >
+                          <div className="mb-1 text-xs text-muted-foreground">
+                            Source {index + 1} · Chunk {source.chunkIndex} ·
+                            Score {source.score.toFixed(3)} ·{' '}
+                            {getScoreLabel(source.score)}
+                          </div>
+                          <p className="line-clamp-4 text-sm leading-6 text-muted-foreground">
+                            {source.chunkText}
+                          </p>
                         </div>
-                        <p className="line-clamp-4 text-sm leading-6 text-muted-foreground">
-                          {source.chunkText}
-                        </p>
-                      </div>
-                    ))}
+                      ))
+                    )}
                   </div>
                 )}
 
