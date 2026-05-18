@@ -9,10 +9,24 @@ interface RetrieveDocumentSourcesInput {
   candidateLimit?: number;
 }
 
-const MIN_SOURCE_COUNT = 3;
-const DEFAULT_SOURCE_LIMIT = 5;
-const DEFAULT_CANDIDATE_LIMIT = 12;
-const RELATIVE_SCORE_CUTOFF = 0.7;
+const getNumberEnv = (name: string, fallback: number): number => {
+  const value = Number(process.env[name]);
+
+  if (Number.isNaN(value) || value <= 0) {
+    return fallback;
+  }
+
+  return value;
+};
+
+const getRetrievalConfig = () => {
+  return {
+    minSourceCount: getNumberEnv('RETRIEVAL_MIN_SOURCES', 3),
+    sourceLimit: getNumberEnv('RETRIEVAL_SOURCE_LIMIT', 5),
+    candidateLimit: getNumberEnv('RETRIEVAL_CANDIDATE_LIMIT', 12),
+    relativeScoreCutoff: getNumberEnv('RETRIEVAL_SCORE_CUTOFF', 0.7),
+  };
+};
 
 const normalizeForDedupe = (text: string): string => {
   return text.toLowerCase().replace(/\s+/g, ' ').trim();
@@ -43,23 +57,25 @@ const removeDuplicateSources = (sources: SearchResult[]): SearchResult[] => {
 
 const selectBestSources = (
   sources: SearchResult[],
-  sourceLimit: number
+  sourceLimit: number,
+  minSourceCount: number,
+  relativeScoreCutoff: number
 ): SearchResult[] => {
   if (sources.length <= sourceLimit) {
     return sources;
   }
 
   const topScore = sources[0]?.score || 0;
-  const minimumScore = topScore * RELATIVE_SCORE_CUTOFF;
+  const minimumScore = topScore * relativeScoreCutoff;
 
   const strongSources = sources.filter((source) => {
     return source.score >= minimumScore;
   });
 
   const selectedSources =
-    strongSources.length >= MIN_SOURCE_COUNT
+    strongSources.length >= minSourceCount
       ? strongSources
-      : sources.slice(0, MIN_SOURCE_COUNT);
+      : sources.slice(0, minSourceCount);
 
   return selectedSources.slice(0, sourceLimit);
 };
@@ -90,23 +106,31 @@ export const retrieveDocumentSources = async ({
   question,
   userId,
   documentId,
-  sourceLimit = DEFAULT_SOURCE_LIMIT,
-  candidateLimit = DEFAULT_CANDIDATE_LIMIT,
+  sourceLimit,
+  candidateLimit,
 }: RetrieveDocumentSourcesInput): Promise<SearchResult[]> => {
+  const config = getRetrievalConfig();
+  const finalSourceLimit = sourceLimit || config.sourceLimit;
+  const finalCandidateLimit = candidateLimit || config.candidateLimit;
   const questionVector = await createEmbedding(question);
 
   const candidates = await searchDocumentChunks(
     questionVector,
     userId,
     documentId,
-    candidateLimit
+    finalCandidateLimit
   );
 
   const usefulSources = candidates.filter(isUsefulSource);
   const dedupedSources = removeDuplicateSources(
     usefulSources.length > 0 ? usefulSources : candidates
   );
-  const selectedSources = selectBestSources(dedupedSources, sourceLimit);
+  const selectedSources = selectBestSources(
+    dedupedSources,
+    finalSourceLimit,
+    config.minSourceCount,
+    config.relativeScoreCutoff
+  );
 
   logRetrievalDebug(question, candidates, selectedSources);
 
