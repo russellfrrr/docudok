@@ -5,8 +5,13 @@ import docsRouter from './routes/document.routes';
 import chatRouter from './routes/chat.routes';
 
 const app = express();
+const corsOrigin = process.env.CORS_ORIGIN || '*';
 
-app.use(cors());
+app.use(
+  cors({
+    origin: corsOrigin,
+  })
+);
 app.use(express.json());
 
 app.get('/api/health', (req, res) => {
