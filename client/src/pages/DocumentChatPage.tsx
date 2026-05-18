@@ -4,6 +4,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AlertCircle,
   ArrowLeft,
+  Check,
+  Copy,
   FileText,
   Loader2,
   MessageSquare,
@@ -36,6 +38,7 @@ export const DocumentChatPage = () => {
   const [message, setMessage] = useState('');
   const [activeView, setActiveView] = useState<'chat' | 'chunks'>('chat');
   const [debugQuestion, setDebugQuestion] = useState('');
+  const [copiedChunkId, setCopiedChunkId] = useState<string | null>(null);
 
   const documentQuery = useQuery({
     queryKey: ['document', documentId],
@@ -138,6 +141,15 @@ export const DocumentChatPage = () => {
     }
 
     return 'weak match';
+  };
+
+  const handleCopyChunk = async (chunkId: string, chunkText: string) => {
+    await navigator.clipboard.writeText(chunkText);
+    setCopiedChunkId(chunkId);
+
+    window.setTimeout(() => {
+      setCopiedChunkId(null);
+    }, 1500);
   };
 
   return (
@@ -545,14 +557,29 @@ export const DocumentChatPage = () => {
                     key={chunk._id}
                     className="rounded-md border bg-background p-4"
                   >
-                    <div className="mb-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                      <span className="font-medium text-foreground">
-                        Chunk {chunk.chunkIndex}
-                      </span>
-                      <span>{chunk.chunkText.length} characters</span>
-                      <span>
-                        Saved {new Date(chunk.createdAt).toLocaleDateString()}
-                      </span>
+                    <div className="mb-3 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-medium text-foreground">
+                          Chunk {chunk.chunkIndex}
+                        </span>
+                        <span>{chunk.chunkText.length} characters</span>
+                        <span>
+                          Saved {new Date(chunk.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleCopyChunk(chunk._id, chunk.chunkText)}
+                      >
+                        {copiedChunkId === chunk._id ? (
+                          <Check className="h-4 w-4" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                        {copiedChunkId === chunk._id ? 'Copied' : 'Copy'}
+                      </Button>
                     </div>
                     <p className="line-clamp-6 whitespace-pre-wrap text-sm leading-6 text-foreground">
                       {chunk.chunkText}
