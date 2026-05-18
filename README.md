@@ -184,6 +184,7 @@ Create `server/.env`:
 
 ```env
 PORT=5000
+CORS_ORIGIN=http://localhost:5173
 MONGO_URI=mongodb://localhost:27017/docudok
 JWT_SECRET=your_jwt_secret
 
@@ -289,6 +290,7 @@ npm run build
 
 - Existing documents need to be retried or re-uploaded when chunking logic changes.
 - Source scores are vector similarity scores, not grades.
+- Set `CORS_ORIGIN` to your deployed frontend URL before shipping the API anywhere public.
 - Set `RETRIEVAL_DEBUG=true` when you want to inspect candidate and selected chunk scores in the server logs.
 - Use the chunk inspector when retrieval feels weird. Bad answers often start with bad chunks, not bad models.
 - Better chunks usually matter more than bigger prompts.
