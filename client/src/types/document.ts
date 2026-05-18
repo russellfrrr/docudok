@@ -34,6 +34,11 @@ export interface DocumentChunk {
 
 export interface DocumentChunksResponse {
   chunks: DocumentChunk[];
+  stats: {
+    totalChunks: number;
+    totalCharacters: number;
+    averageChunkLength: number;
+  };
 }
 
 export interface SourceSnippet {

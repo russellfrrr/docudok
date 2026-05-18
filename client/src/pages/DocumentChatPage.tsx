@@ -495,6 +495,35 @@ export const DocumentChatPage = () => {
                   </div>
                 )}
 
+                {chunksQuery.data && (
+                  <div className="grid gap-2 sm:grid-cols-3">
+                    <div className="rounded-md border bg-background p-3">
+                      <div className="text-xs text-muted-foreground">
+                        Total chunks
+                      </div>
+                      <div className="text-lg font-semibold text-foreground">
+                        {chunksQuery.data.stats.totalChunks}
+                      </div>
+                    </div>
+                    <div className="rounded-md border bg-background p-3">
+                      <div className="text-xs text-muted-foreground">
+                        Total characters
+                      </div>
+                      <div className="text-lg font-semibold text-foreground">
+                        {chunksQuery.data.stats.totalCharacters}
+                      </div>
+                    </div>
+                    <div className="rounded-md border bg-background p-3">
+                      <div className="text-xs text-muted-foreground">
+                        Avg. chunk length
+                      </div>
+                      <div className="text-lg font-semibold text-foreground">
+                        {chunksQuery.data.stats.averageChunkLength}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {chunksQuery.isLoading && (
                   <p className="text-sm text-muted-foreground">Loading chunks...</p>
                 )}
