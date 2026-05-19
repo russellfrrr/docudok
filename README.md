@@ -304,6 +304,15 @@ npm run build
 
 ---
 
+## Troubleshooting
+
+- If a PDF fails processing, check whether it contains selectable text. Scanned/image-only PDFs need OCR, which this project does not handle yet.
+- If document chat returns weak answers, open the chunk inspector and test retrieval before blaming the model.
+- If uploads work but chat does not, make sure Qdrant is running and `QDRANT_URL` points to the right instance.
+- If embeddings fail, check `OPENAI_API_KEY`, `OPENAI_BASE_URL`, and the embedding model/dimension settings.
+
+---
+
 ## Current Status
 
 Still building, still learning, still breaking things in useful ways.
