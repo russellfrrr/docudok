@@ -30,6 +30,8 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 
+const MAX_PDF_SIZE_BYTES = 10 * 1024 * 1024;
+
 export const DashboardPage = () => {
   const queryClient = useQueryClient();
   const user = useAuthStore((state) => state.user);
@@ -39,10 +41,12 @@ export const DashboardPage = () => {
 
   const [title, setTitle] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState('');
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const clearSelectedFile = () => {
     setSelectedFile(null);
+    setFileError('');
 
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -53,6 +57,10 @@ export const DashboardPage = () => {
     mutationFn: async () => {
       if (!selectedFile) {
         throw new Error('Please choose a PDF file');
+      }
+
+      if (fileError) {
+        throw new Error(fileError);
       }
 
       return uploadDocument(selectedFile, title);
@@ -100,9 +108,23 @@ export const DashboardPage = () => {
 
     if (!file) {
       setSelectedFile(null);
+      setFileError('');
       return;
     }
 
+    if (file.type !== 'application/pdf') {
+      setSelectedFile(null);
+      setFileError('Only PDF files are allowed');
+      return;
+    }
+
+    if (file.size > MAX_PDF_SIZE_BYTES) {
+      setSelectedFile(null);
+      setFileError('PDF file must be 10MB or smaller');
+      return;
+    }
+
+    setFileError('');
     setSelectedFile(file);
   };
 
@@ -202,7 +224,9 @@ export const DashboardPage = () => {
                         {selectedFile ? selectedFile.name : 'Choose a PDF document'}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {selectedFile ? 'Ready to upload' : 'PDF files only'}
+                        {selectedFile
+                          ? 'Ready to upload'
+                          : 'PDF files only, up to 10MB'}
                       </p>
                     </div>
                   </div>
@@ -233,12 +257,19 @@ export const DashboardPage = () => {
               <Button
                 type="submit"
                 className="w-fit"
-                disabled={!selectedFile || uploadMutation.isPending}
+                disabled={!selectedFile || Boolean(fileError) || uploadMutation.isPending}
               >
                 <Upload className="h-4 w-4" />
                 {uploadMutation.isPending ? 'Uploading...' : 'Upload document'}
               </Button>
             </form>
+
+            {fileError && (
+              <Alert variant="destructive" className="mt-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{fileError}</AlertDescription>
+              </Alert>
+            )}
 
             {uploadMutation.isSuccess && (
               <Alert className="mt-4">
