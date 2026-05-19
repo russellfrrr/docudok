@@ -157,6 +157,11 @@ export const DocumentChatPage = () => {
     }, 1500);
   };
 
+  const clearRetrievalTest = () => {
+    setDebugQuestion('');
+    searchMutation.reset();
+  };
+
   return (
     <main className="min-h-screen bg-muted">
       <header className="border-b bg-card">
@@ -479,6 +484,16 @@ export const DocumentChatPage = () => {
                       )}
                       Test
                     </Button>
+                    {(debugQuestion || searchMutation.data) && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="sm:w-fit"
+                        onClick={clearRetrievalTest}
+                      >
+                        Clear
+                      </Button>
+                    )}
                   </div>
                 </form>
 
