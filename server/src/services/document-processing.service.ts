@@ -36,7 +36,16 @@ export const processDocument = async ({
 
     const rawText = await extractTextFromPdf(filePath);
     const cleanedText = cleanText(rawText);
+
+    if (!cleanedText) {
+      throw new Error('No readable text found in PDF');
+    }
+
     const chunks = await splitTextIntoChunks(cleanedText);
+
+    if (chunks.length === 0) {
+      throw new Error('No usable chunks created from PDF');
+    }
 
     const chunkDocuments = chunks.map((chunkText, index) => {
       return {
