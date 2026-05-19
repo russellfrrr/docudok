@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -33,6 +33,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 export const DocumentChatPage = () => {
   const { documentId } = useParams();
   const queryClient = useQueryClient();
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [message, setMessage] = useState('');
@@ -107,6 +108,10 @@ export const DocumentChatPage = () => {
       return searchDocument(documentId, debugQuestion.trim());
     },
   });
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messagesQuery.data?.messages.length, sendMessageMutation.isPending]);
 
   if (!documentId) {
     return <Navigate to="/" />;
@@ -398,6 +403,8 @@ export const DocumentChatPage = () => {
                     </AlertDescription>
                   </Alert>
                 )}
+
+                <div ref={messagesEndRef} />
               </div>
 
               <div className="border-t bg-background/80 p-3 sm:p-4">
