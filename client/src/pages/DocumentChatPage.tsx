@@ -366,7 +366,7 @@ export const DocumentChatPage = () => {
                                 className="rounded-md border bg-muted/50 p-3"
                               >
                                 <div className="mb-1 text-xs text-muted-foreground">
-                                  Source {index + 1} · Chunk {source.chunkIndex}
+                                  Source {index + 1} - Chunk {source.chunkIndex}
                                 </div>
                                 <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
                                   {source.chunkText}
@@ -503,8 +503,8 @@ export const DocumentChatPage = () => {
                           className="rounded-md border bg-muted/50 p-3"
                         >
                           <div className="mb-1 text-xs text-muted-foreground">
-                            Source {index + 1} · Chunk {source.chunkIndex} ·
-                            Score {source.score.toFixed(3)} ·{' '}
+                            Source {index + 1} - Chunk {source.chunkIndex} -
+                            Score {source.score.toFixed(3)} -{' '}
                             {getScoreLabel(source.score)}
                           </div>
                           <p className="line-clamp-4 text-sm leading-6 text-muted-foreground">
