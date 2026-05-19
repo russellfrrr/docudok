@@ -30,6 +30,12 @@ import {
 } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
+const SUGGESTED_QUESTIONS = [
+  'Summarize this document.',
+  'What are the most important details?',
+  'What should I review carefully?',
+];
+
 export const DocumentChatPage = () => {
   const { documentId } = useParams();
   const queryClient = useQueryClient();
@@ -330,6 +336,19 @@ export const DocumentChatPage = () => {
                       The assistant will answer only from the document context and
                       show the source snippets it used.
                     </p>
+                    <div className="mt-4 flex flex-wrap justify-center gap-2">
+                      {SUGGESTED_QUESTIONS.map((question) => (
+                        <Button
+                          key={question}
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setMessage(question)}
+                        >
+                          {question}
+                        </Button>
+                      ))}
+                    </div>
                   </div>
                 )}
 
