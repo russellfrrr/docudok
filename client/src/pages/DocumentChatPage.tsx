@@ -22,6 +22,7 @@ import type { Chat } from '@/types/chat';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AppLogo } from '@/components/layout/AppLogo';
+import { DocumentStatusBadge } from '@/components/document/DocumentStatusBadge';
 import {
   Card,
   CardContent,
@@ -130,18 +131,6 @@ export const DocumentChatPage = () => {
   const inputIsDisabled =
     !selectedChatId || !documentIsReady || sendMessageMutation.isPending;
 
-  const getStatusClassName = (status: string) => {
-    if (status === 'ready') {
-      return 'border-emerald-200 bg-emerald-50 text-emerald-700';
-    }
-
-    if (status === 'failed') {
-      return 'border-red-200 bg-red-50 text-red-700';
-    }
-
-    return 'border-amber-200 bg-amber-50 text-amber-700';
-  };
-
   const getScoreLabel = (score: number) => {
     if (score >= 0.75) {
       return 'strong match';
@@ -205,13 +194,7 @@ export const DocumentChatPage = () => {
               </p>
             </div>
 
-            <span
-              className={`w-fit rounded-md border px-2 py-1 text-xs capitalize ${
-                document ? getStatusClassName(document.status) : ''
-              }`}
-            >
-              {document?.status || 'loading'}
-            </span>
+            <DocumentStatusBadge status={document?.status || 'loading'} />
           </div>
         </div>
       </header>
