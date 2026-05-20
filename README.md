@@ -78,6 +78,7 @@ So expect:
 - [x] Saved chat history
 - [x] Delete documents and related data
 - [x] Retry failed document processing
+- [x] Route-level frontend code splitting
 - [ ] Cleaner source snippet UI
 - [ ] Streaming responses
 - [ ] OAuth login
@@ -241,6 +242,12 @@ http://localhost:5173
 
 ## API Routes
 
+### Health
+
+```txt
+GET /api/health
+```
+
 ### Auth
 
 ```txt
@@ -287,6 +294,8 @@ Frontend:
 cd client
 npm run build
 ```
+
+The frontend uses route-level code splitting, so page bundles are loaded only when needed instead of shipping the whole UI in the first JavaScript chunk.
 
 ---
 
