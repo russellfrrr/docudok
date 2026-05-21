@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getMe } from '@/services/auth.service';
 import { useAuthStore } from '@/store/auth.store';
+import { PageLoading } from '@/components/layout/PageLoading';
 
 const LoginPage = lazy(() =>
   import('@/pages/LoginPage').then((module) => ({
@@ -40,13 +41,7 @@ export const App = () => {
   });
 
   return (
-    <Suspense
-      fallback={
-        <main className="flex min-h-screen items-center justify-center bg-muted text-sm text-muted-foreground">
-          Loading...
-        </main>
-      }
-    >
+    <Suspense fallback={<PageLoading />}>
       <Routes>
         <Route
           path="/"
