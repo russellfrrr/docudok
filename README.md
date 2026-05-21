@@ -49,6 +49,7 @@ So expect:
 - **Backend:** Node.js + Express + TypeScript
 - **Database:** MongoDB + Mongoose
 - **AI / RAG:** OpenAI-compatible chat + embeddings, LangChain text splitters
+- **AI Client:** Shared OpenAI SDK client configured with `OPENAI_API_KEY` and optional `OPENAI_BASE_URL`
 - **Vector DB:** Qdrant
 - **File Uploads:** Multer
 - **PDF Parsing:** pdf-parse
@@ -309,6 +310,7 @@ The frontend uses route-level code splitting, so page bundles are loaded only wh
 - Use the chunk inspector when retrieval feels weird. Bad answers often start with bad chunks, not bad models.
 - Better chunks usually matter more than bigger prompts.
 - Retrieval quality depends heavily on extraction quality, cleaning, chunking, and embedding model choice.
+- Keep OpenAI-compatible provider config in one place so switching providers does not turn into a refactor party.
 - Do not pretend this is production-ready until deployment, security, logging, and file handling are cleaned up properly.
 
 ---
