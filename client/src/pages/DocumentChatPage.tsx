@@ -30,6 +30,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { copyToClipboard } from '@/lib/clipboard';
 import { formatDate, formatNumber } from '@/lib/format';
 
 const SUGGESTED_QUESTIONS = [
@@ -145,7 +146,7 @@ export const DocumentChatPage = () => {
   };
 
   const handleCopyChunk = async (chunkId: string, chunkText: string) => {
-    await navigator.clipboard.writeText(chunkText);
+    await copyToClipboard(chunkText);
     setCopiedChunkId(chunkId);
 
     window.setTimeout(() => {
