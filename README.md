@@ -311,6 +311,7 @@ The frontend uses route-level code splitting, so page bundles are loaded only wh
 - Better chunks usually matter more than bigger prompts.
 - Retrieval quality depends heavily on extraction quality, cleaning, chunking, and embedding model choice.
 - Keep OpenAI-compatible provider config in one place so switching providers does not turn into a refactor party.
+- Shared frontend helpers handle small formatting and clipboard actions so page components stay easier to read.
 - Do not pretend this is production-ready until deployment, security, logging, and file handling are cleaned up properly.
 
 ---
