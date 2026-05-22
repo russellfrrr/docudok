@@ -24,6 +24,7 @@ import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AppLogo } from '@/components/layout/AppLogo';
 import { DocumentStatusBadge } from '@/components/document/DocumentStatusBadge';
+import { formatDate, formatFileSize } from '@/lib/format';
 import {
   Card,
   CardContent,
@@ -214,7 +215,7 @@ export const DashboardPage = () => {
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {selectedFile
-                          ? 'Ready to upload'
+                          ? `Ready to upload - ${formatFileSize(selectedFile.size)}`
                           : 'PDF files only, up to 10MB'}
                       </p>
                     </div>
@@ -341,7 +342,7 @@ export const DashboardPage = () => {
                           : 'Upload failed'}
                     </span>
                     <span>
-                      {new Date(document.createdAt).toLocaleDateString()}
+                      {formatDate(document.createdAt)}
                     </span>
                   </CardContent>
                 </>
