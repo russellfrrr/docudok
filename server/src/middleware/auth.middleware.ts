@@ -24,7 +24,7 @@ export const authMiddleware = async (
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({
-        message: 'Not authorized, no token'
+        message: 'Not authorized, no token',
       });
     }
 
@@ -40,7 +40,7 @@ export const authMiddleware = async (
 
     if (!user) {
       return res.status(401).json({
-        message: 'Not authorized, user not found'
+        message: 'Not authorized, user not found',
       });
     }
 
@@ -53,7 +53,7 @@ export const authMiddleware = async (
     next();
   } catch (err) {
     res.status(401).json({
-      message: 'Not authorized, token failed'
-    })
+      message: 'Not authorized, token failed',
+    });
   }
-}
+};
