@@ -30,6 +30,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { formatDate, formatNumber } from '@/lib/format';
 
 const SUGGESTED_QUESTIONS = [
   'Summarize this document.',
@@ -547,7 +548,7 @@ export const DocumentChatPage = () => {
                         Total chunks
                       </div>
                       <div className="text-lg font-semibold text-foreground">
-                        {chunksQuery.data.stats.totalChunks}
+                        {formatNumber(chunksQuery.data.stats.totalChunks)}
                       </div>
                     </div>
                     <div className="rounded-md border bg-background p-3">
@@ -555,7 +556,7 @@ export const DocumentChatPage = () => {
                         Total characters
                       </div>
                       <div className="text-lg font-semibold text-foreground">
-                        {chunksQuery.data.stats.totalCharacters}
+                        {formatNumber(chunksQuery.data.stats.totalCharacters)}
                       </div>
                     </div>
                     <div className="rounded-md border bg-background p-3">
@@ -563,7 +564,7 @@ export const DocumentChatPage = () => {
                         Avg. chunk length
                       </div>
                       <div className="text-lg font-semibold text-foreground">
-                        {chunksQuery.data.stats.averageChunkLength}
+                        {formatNumber(chunksQuery.data.stats.averageChunkLength)}
                       </div>
                     </div>
                   </div>
@@ -596,9 +597,7 @@ export const DocumentChatPage = () => {
                           Chunk {chunk.chunkIndex}
                         </span>
                         <span>{chunk.chunkText.length} characters</span>
-                        <span>
-                          Saved {new Date(chunk.createdAt).toLocaleDateString()}
-                        </span>
+                        <span>Saved {formatDate(chunk.createdAt)}</span>
                       </div>
                       <Button
                         type="button"
