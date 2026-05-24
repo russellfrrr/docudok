@@ -52,7 +52,7 @@ export const DocumentChatPage = () => {
   const [message, setMessage] = useState('');
   const [activeView, setActiveView] = useState<'chat' | 'chunks'>('chat');
   const [debugQuestion, setDebugQuestion] = useState('');
-  const [copiedChunkId, setCopiedChunkId] = useState<string | null>(null);
+  const [copiedTextId, setCopiedTextId] = useState<string | null>(null);
 
   const documentQuery = useQuery({
     queryKey: ['document', documentId],
@@ -149,12 +149,12 @@ export const DocumentChatPage = () => {
     return 'weak match';
   };
 
-  const handleCopyChunk = async (chunkId: string, chunkText: string) => {
-    await copyToClipboard(chunkText);
-    setCopiedChunkId(chunkId);
+  const handleCopyText = async (copyId: string, text: string) => {
+    await copyToClipboard(text);
+    setCopiedTextId(copyId);
 
     window.setTimeout(() => {
-      setCopiedChunkId(null);
+      setCopiedTextId(null);
     }, 1500);
   };
 
@@ -378,19 +378,40 @@ export const DocumentChatPage = () => {
                               Sources
                             </div>
 
-                            {chatMessage.sources.map((source, index) => (
-                              <div
-                                key={`${chatMessage._id}-${source.chunkIndex}-${source.score}`}
-                                className="rounded-md border bg-muted/50 p-3"
-                              >
-                                <div className="mb-1 text-xs text-muted-foreground">
-                                  Source {index + 1} - Chunk {source.chunkIndex}
+                            {chatMessage.sources.map((source, index) => {
+                              const copyId = `${chatMessage._id}-source-${source.chunkIndex}-${index}`;
+
+                              return (
+                                <div
+                                  key={`${chatMessage._id}-${source.chunkIndex}-${source.score}`}
+                                  className="rounded-md border bg-muted/50 p-3"
+                                >
+                                  <div className="mb-1 flex items-center justify-between gap-2 text-xs text-muted-foreground">
+                                    <span>
+                                      Source {index + 1} - Chunk {source.chunkIndex}
+                                    </span>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() =>
+                                        handleCopyText(copyId, source.chunkText)
+                                      }
+                                    >
+                                      {copiedTextId === copyId ? (
+                                        <Check className="h-4 w-4" />
+                                      ) : (
+                                        <Copy className="h-4 w-4" />
+                                      )}
+                                      {copiedTextId === copyId ? 'Copied' : 'Copy'}
+                                    </Button>
+                                  </div>
+                                  <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
+                                    {source.chunkText}
+                                  </p>
                                 </div>
-                                <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
-                                  {source.chunkText}
-                                </p>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         )}
                     </div>
@@ -527,21 +548,42 @@ export const DocumentChatPage = () => {
                         checking whether the document chunks contain the answer.
                       </p>
                     ) : (
-                      searchMutation.data.sources.map((source, index) => (
-                        <div
-                          key={`${source.chunkIndex}-${source.score}`}
-                          className="rounded-md border bg-muted/50 p-3"
-                        >
-                          <div className="mb-1 text-xs text-muted-foreground">
-                            Source {index + 1} - Chunk {source.chunkIndex} -
-                            Score {source.score.toFixed(3)} -{' '}
-                            {getScoreLabel(source.score)}
+                      searchMutation.data.sources.map((source, index) => {
+                        const copyId = `retrieval-source-${source.chunkIndex}-${index}`;
+
+                        return (
+                          <div
+                            key={`${source.chunkIndex}-${source.score}`}
+                            className="rounded-md border bg-muted/50 p-3"
+                          >
+                            <div className="mb-1 flex items-center justify-between gap-2 text-xs text-muted-foreground">
+                              <span>
+                                Source {index + 1} - Chunk {source.chunkIndex} -
+                                Score {source.score.toFixed(3)} -{' '}
+                                {getScoreLabel(source.score)}
+                              </span>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() =>
+                                  handleCopyText(copyId, source.chunkText)
+                                }
+                              >
+                                {copiedTextId === copyId ? (
+                                  <Check className="h-4 w-4" />
+                                ) : (
+                                  <Copy className="h-4 w-4" />
+                                )}
+                                {copiedTextId === copyId ? 'Copied' : 'Copy'}
+                              </Button>
+                            </div>
+                            <p className="line-clamp-4 text-sm leading-6 text-muted-foreground">
+                              {source.chunkText}
+                            </p>
                           </div>
-                          <p className="line-clamp-4 text-sm leading-6 text-muted-foreground">
-                            {source.chunkText}
-                          </p>
-                        </div>
-                      ))
+                        );
+                      })
                     )}
                   </div>
                 )}
@@ -625,14 +667,14 @@ export const DocumentChatPage = () => {
                         type="button"
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleCopyChunk(chunk._id, chunk.chunkText)}
+                        onClick={() => handleCopyText(chunk._id, chunk.chunkText)}
                       >
-                        {copiedChunkId === chunk._id ? (
+                        {copiedTextId === chunk._id ? (
                           <Check className="h-4 w-4" />
                         ) : (
                           <Copy className="h-4 w-4" />
                         )}
-                        {copiedChunkId === chunk._id ? 'Copied' : 'Copy'}
+                        {copiedTextId === chunk._id ? 'Copied' : 'Copy'}
                       </Button>
                     </div>
                     <p className="line-clamp-6 whitespace-pre-wrap text-sm leading-6 text-foreground">
