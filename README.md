@@ -74,7 +74,9 @@ So expect:
 - [x] Semantic search
 - [x] Context-aware document chat
 - [x] Source snippets
+- [x] Copyable source snippets
 - [x] Chunk inspector
+- [x] Chunk word and character metrics
 - [x] Retrieval playground for testing search quality
 - [x] Saved chat history
 - [x] Delete documents and related data
@@ -308,6 +310,7 @@ The frontend uses route-level code splitting, so page bundles are loaded only wh
 - Set `RETRIEVAL_DEBUG=true` when you want to inspect candidate and selected chunk scores in the server logs.
 - Tune `RETRIEVAL_CANDIDATE_LIMIT` and `RETRIEVAL_SCORE_CUTOFF` when experimenting with retrieval quality.
 - Use the chunk inspector when retrieval feels weird. Bad answers often start with bad chunks, not bad models.
+- Watch both word count and character count when tuning chunks. PDFs with weird spacing can make one metric lie.
 - Better chunks usually matter more than bigger prompts.
 - Retrieval quality depends heavily on extraction quality, cleaning, chunking, and embedding model choice.
 - Keep OpenAI-compatible provider config in one place so switching providers does not turn into a refactor party.
