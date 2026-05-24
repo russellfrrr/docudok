@@ -39,6 +39,10 @@ const SUGGESTED_QUESTIONS = [
   'What should I review carefully?',
 ];
 
+const countWords = (text: string) => {
+  return text.trim().split(/\s+/).filter(Boolean).length;
+};
+
 export const DocumentChatPage = () => {
   const { documentId } = useParams();
   const queryClient = useQueryClient();
@@ -543,7 +547,7 @@ export const DocumentChatPage = () => {
                 )}
 
                 {chunksQuery.data && (
-                  <div className="grid gap-2 sm:grid-cols-3">
+                  <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
                     <div className="rounded-md border bg-background p-3">
                       <div className="text-xs text-muted-foreground">
                         Total chunks
@@ -562,10 +566,26 @@ export const DocumentChatPage = () => {
                     </div>
                     <div className="rounded-md border bg-background p-3">
                       <div className="text-xs text-muted-foreground">
-                        Avg. chunk length
+                        Total words
+                      </div>
+                      <div className="text-lg font-semibold text-foreground">
+                        {formatNumber(chunksQuery.data.stats.totalWords)}
+                      </div>
+                    </div>
+                    <div className="rounded-md border bg-background p-3">
+                      <div className="text-xs text-muted-foreground">
+                        Avg. characters
                       </div>
                       <div className="text-lg font-semibold text-foreground">
                         {formatNumber(chunksQuery.data.stats.averageChunkLength)}
+                      </div>
+                    </div>
+                    <div className="rounded-md border bg-background p-3">
+                      <div className="text-xs text-muted-foreground">
+                        Avg. words
+                      </div>
+                      <div className="text-lg font-semibold text-foreground">
+                        {formatNumber(chunksQuery.data.stats.averageChunkWords)}
                       </div>
                     </div>
                   </div>
@@ -598,6 +618,7 @@ export const DocumentChatPage = () => {
                           Chunk {chunk.chunkIndex}
                         </span>
                         <span>{chunk.chunkText.length} characters</span>
+                        <span>{formatNumber(countWords(chunk.chunkText))} words</span>
                         <span>Saved {formatDate(chunk.createdAt)}</span>
                       </div>
                       <Button
