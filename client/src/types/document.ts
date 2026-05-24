@@ -37,7 +37,9 @@ export interface DocumentChunksResponse {
   stats: {
     totalChunks: number;
     totalCharacters: number;
+    totalWords: number;
     averageChunkLength: number;
+    averageChunkWords: number;
   };
 }
 
