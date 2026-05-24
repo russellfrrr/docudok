@@ -9,6 +9,13 @@ interface RetrieveDocumentSourcesInput {
   candidateLimit?: number;
 }
 
+interface RetrievalDebugConfig {
+  sourceLimit: number;
+  candidateLimit: number;
+  minSourceCount: number;
+  relativeScoreCutoff: number;
+}
+
 const getNumberEnv = (name: string, fallback: number): number => {
   const value = Number(process.env[name]);
 
@@ -83,7 +90,8 @@ const selectBestSources = (
 const logRetrievalDebug = (
   question: string,
   candidates: SearchResult[],
-  sources: SearchResult[]
+  sources: SearchResult[],
+  config: RetrievalDebugConfig
 ) => {
   if (process.env.RETRIEVAL_DEBUG !== 'true') {
     return;
@@ -91,6 +99,7 @@ const logRetrievalDebug = (
 
   console.log('Retrieval debug:', {
     question,
+    config,
     candidateScores: candidates.map((source) => ({
       chunkIndex: source.chunkIndex,
       score: Number(source.score.toFixed(3)),
@@ -132,7 +141,12 @@ export const retrieveDocumentSources = async ({
     config.relativeScoreCutoff
   );
 
-  logRetrievalDebug(question, candidates, selectedSources);
+  logRetrievalDebug(question, candidates, selectedSources, {
+    sourceLimit: finalSourceLimit,
+    candidateLimit: finalCandidateLimit,
+    minSourceCount: config.minSourceCount,
+    relativeScoreCutoff: config.relativeScoreCutoff,
+  });
 
   return selectedSources;
 };
