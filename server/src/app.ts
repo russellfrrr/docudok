@@ -19,6 +19,8 @@ app.get('/api/health', (req, res) => {
   res.json({
     message: 'server is running',
     service: 'docudok-api',
+    environment: process.env.NODE_ENV || 'development',
+    uptimeSeconds: Math.round(process.uptime()),
     timestamp: new Date().toISOString(),
   });
 });
