@@ -10,6 +10,7 @@ import { deleteDocumentVectors } from '../services/vector.service';
 import { generateAnswer } from '../services/ai.service';
 import { processDocument } from '../services/document-processing.service';
 import { retrieveDocumentSources } from '../services/retrieval.service';
+import { countWords } from '../utils/text-stats';
 
 
 export const uploadDocument = async (req: AuthRequest, res: Response) => {
@@ -113,11 +114,18 @@ export const getDocumentChunks = async (req: AuthRequest, res: Response) => {
       return total + chunk.chunkText.length;
     }, 0);
 
+    const totalWords = chunks.reduce((total, chunk) => {
+      return total + countWords(chunk.chunkText);
+    }, 0);
+
     const stats = {
       totalChunks: chunks.length,
       totalCharacters,
+      totalWords,
       averageChunkLength:
         chunks.length > 0 ? Math.round(totalCharacters / chunks.length) : 0,
+      averageChunkWords:
+        chunks.length > 0 ? Math.round(totalWords / chunks.length) : 0,
     };
 
     res.json({ chunks, stats });
