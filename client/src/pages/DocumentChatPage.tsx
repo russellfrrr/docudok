@@ -32,16 +32,13 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { copyToClipboard } from '@/lib/clipboard';
 import { formatDate, formatNumber } from '@/lib/format';
+import { countWords } from '@/lib/text-stats';
 
 const SUGGESTED_QUESTIONS = [
   'Summarize this document.',
   'What are the most important details?',
   'What should I review carefully?',
 ];
-
-const countWords = (text: string) => {
-  return text.trim().split(/\s+/).filter(Boolean).length;
-};
 
 export const DocumentChatPage = () => {
   const { documentId } = useParams();
