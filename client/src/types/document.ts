@@ -6,6 +6,7 @@ export interface Document {
   title: string;
   fileName: string;
   status: DocumentStatus;
+  processingError?: string;
   totalChunks: number;
   createdAt: string;
 }

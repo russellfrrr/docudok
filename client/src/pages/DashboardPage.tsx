@@ -334,13 +334,20 @@ export const DashboardPage = () => {
                   </CardHeader>
 
                   <CardContent className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>
-                      {isReady
-                        ? `${document.totalChunks} chunks`
-                        : document.status === 'processing'
-                          ? 'Processing document'
-                          : 'Upload failed'}
-                    </span>
+                    <div className="min-w-0">
+                      <p>
+                        {isReady
+                          ? `${document.totalChunks} chunks`
+                          : document.status === 'processing'
+                            ? 'Processing document'
+                            : 'Upload failed'}
+                      </p>
+                      {document.status === 'failed' && document.processingError && (
+                        <p className="mt-1 truncate text-xs text-destructive">
+                          {document.processingError}
+                        </p>
+                      )}
+                    </div>
                     <span>
                       {formatDate(document.createdAt)}
                     </span>
