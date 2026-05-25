@@ -35,6 +35,7 @@ export const uploadDocument = async (req: AuthRequest, res: Response) => {
       title,
       fileName: req.file.filename,
       status: 'processing',
+      processingError: '',
       totalChunks: 0,
     });
 
@@ -168,6 +169,7 @@ export const retryDocumentProcessing = async (req: AuthRequest, res: Response) =
     }
 
     document.status = 'processing';
+    document.processingError = '';
     document.totalChunks = 0;
     await document.save();
 

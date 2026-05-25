@@ -5,6 +5,7 @@ export interface IDocument extends Document {
   title: string;
   fileName: string;
   status: 'processing' | 'ready' | 'failed';
+  processingError?: string;
   totalChunks: number;
   createdAt: Date;
 }
@@ -28,6 +29,10 @@ const documentSchema = new Schema<IDocument>({
     type: String,
     enum: ['processing', 'ready', 'failed'],
     default: 'processing',
+  },
+  processingError: {
+    type: String,
+    default: '',
   },
   totalChunks: {
     type: Number,

@@ -76,6 +76,7 @@ export const processDocument = async ({
     await saveChunkVectors(vectorItems);
 
     document.status = 'ready';
+    document.processingError = '';
     document.totalChunks = chunks.length;
     await document.save();
 
@@ -83,8 +84,12 @@ export const processDocument = async ({
   } catch (err) {
     console.error('Process document failed', err);
 
+    const message =
+      err instanceof Error ? err.message : 'Document processing failed';
+
     await DocumentModel.findByIdAndUpdate(documentId, {
       status: 'failed',
+      processingError: message,
     });
 
     await DocumentChunkModel.deleteMany({
