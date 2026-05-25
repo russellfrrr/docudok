@@ -131,6 +131,10 @@ export const DocumentChatPage = () => {
   const messages = messagesQuery.data?.messages || [];
   const document = documentQuery.data?.document;
   const documentIsReady = document?.status === 'ready';
+  const hasSelectedChat = Boolean(selectedChatId);
+  const hasMessages = messages.length > 0;
+  const showEmptyChat =
+    hasSelectedChat && !hasMessages && !messagesQuery.isLoading;
   const inputIsDisabled =
     !selectedChatId || !documentIsReady || sendMessageMutation.isPending;
 
@@ -308,11 +312,11 @@ export const DocumentChatPage = () => {
                   </div>
                 )}
 
-                {messagesQuery.isLoading && selectedChatId && (
+                {messagesQuery.isLoading && hasSelectedChat && (
                   <p className="text-sm text-muted-foreground">Loading messages...</p>
                 )}
 
-                {selectedChatId && messages.length === 0 && !messagesQuery.isLoading && (
+                {showEmptyChat && (
                   <div className="flex min-h-[360px] flex-col items-center justify-center rounded-md border bg-background p-6 text-center">
                     <MessageSquare className="mb-3 h-8 w-8 text-muted-foreground" />
                     <h2 className="text-base font-medium text-foreground">
