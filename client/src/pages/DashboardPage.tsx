@@ -317,6 +317,12 @@ export const DashboardPage = () => {
           <div className="grid gap-3">
             {documentsQuery.data.documents.map((document) => {
               const isReady = document.status === 'ready';
+              const isRetryingDocument =
+                retryMutation.isPending &&
+                retryMutation.variables === document._id;
+              const isDeletingDocument =
+                deleteMutation.isPending &&
+                deleteMutation.variables === document._id;
 
               const documentContent = (
                 <>
@@ -381,9 +387,13 @@ export const DashboardPage = () => {
                         size="icon"
                         className="text-muted-foreground hover:text-foreground"
                         onClick={() => handleRetryDocument(document._id)}
-                        disabled={retryMutation.isPending}
+                        disabled={isRetryingDocument || isDeletingDocument}
                       >
-                        <RotateCcw className="h-4 w-4" />
+                        <RotateCcw
+                          className={`h-4 w-4 ${
+                            isRetryingDocument ? 'animate-spin' : ''
+                          }`}
+                        />
                       </Button>
                     )}
 
@@ -393,7 +403,7 @@ export const DashboardPage = () => {
                       size="icon"
                       className="text-muted-foreground hover:text-destructive"
                       onClick={() => handleDeleteDocument(document._id)}
-                      disabled={deleteMutation.isPending}
+                      disabled={isDeletingDocument || isRetryingDocument}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
