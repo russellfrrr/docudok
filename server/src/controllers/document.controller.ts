@@ -163,6 +163,7 @@ export const retryDocumentProcessing = async (req: AuthRequest, res: Response) =
 
     if (!fs.existsSync(filePath)) {
       document.status = 'failed';
+      document.processingError = 'Uploaded file not found';
       await document.save();
 
       return res.status(404).json({ message: 'Uploaded file not found' });
