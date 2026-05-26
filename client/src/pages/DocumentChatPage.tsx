@@ -196,7 +196,8 @@ export const DocumentChatPage = () => {
                   : document?.status === 'processing'
                     ? 'Processing document before chat is available'
                     : document?.status === 'failed'
-                      ? 'Processing failed. Retry from the dashboard.'
+                      ? document.processingError ||
+                        'Processing failed. Retry from the dashboard.'
                       : 'Loading document details'}
               </p>
             </div>
