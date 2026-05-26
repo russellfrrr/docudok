@@ -324,6 +324,7 @@ The frontend uses route-level code splitting, so page bundles are loaded only wh
 
 - If a PDF fails processing, check whether it contains selectable text. Scanned/image-only PDFs need OCR, which this project does not handle yet.
 - Failed documents show the stored processing error on the dashboard, then retry clears the old error before processing again.
+- If the original uploaded file is missing during retry, the document keeps a clear `Uploaded file not found` error.
 - If document chat returns weak answers, open the chunk inspector and test retrieval before blaming the model.
 - If uploads work but chat does not, make sure Qdrant is running and `QDRANT_URL` points to the right instance.
 - If embeddings fail, check `OPENAI_API_KEY`, `OPENAI_BASE_URL`, and the embedding model/dimension settings.
