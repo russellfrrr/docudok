@@ -131,6 +131,7 @@ export const DocumentChatPage = () => {
   const messages = messagesQuery.data?.messages || [];
   const document = documentQuery.data?.document;
   const documentIsReady = document?.status === 'ready';
+  const documentFailed = document?.status === 'failed';
   const hasSelectedChat = Boolean(selectedChatId);
   const hasMessages = messages.length > 0;
   const showEmptyChat =
@@ -300,6 +301,16 @@ export const DocumentChatPage = () => {
             {activeView === 'chat' ? (
               <CardContent className="flex min-h-0 flex-1 flex-col p-0">
               <div className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-6">
+                {documentFailed && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      {document.processingError ||
+                        'Document processing failed. Retry it from the dashboard.'}
+                    </AlertDescription>
+                  </Alert>
+                )}
+
                 {!selectedChatId && (
                   <div className="flex min-h-[360px] flex-col items-center justify-center rounded-md border bg-background p-6 text-center">
                     <MessageSquare className="mb-3 h-8 w-8 text-muted-foreground" />
