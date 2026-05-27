@@ -3,6 +3,7 @@ import {
   CheckCircle2,
   FileText,
   LogOut,
+  Loader2,
   RefreshCcw,
   Trash2,
   Upload,
@@ -40,6 +41,8 @@ export const DashboardPage = () => {
   const logout = useAuthStore((state) => state.logout);
 
   const documentsQuery = useDocuments();
+  const documentsAreRefreshing =
+    documentsQuery.isFetching && !documentsQuery.isLoading;
 
   const [title, setTitle] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -169,9 +172,14 @@ export const DashboardPage = () => {
             variant="outline"
             size="sm"
             onClick={() => documentsQuery.refetch()}
+            disabled={documentsQuery.isFetching}
           >
-            <RefreshCcw className="h-4 w-4" />
-            Refresh
+            {documentsAreRefreshing ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCcw className="h-4 w-4" />
+            )}
+            {documentsAreRefreshing ? 'Refreshing...' : 'Refresh'}
           </Button>
         </div>
 
