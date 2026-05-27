@@ -1,5 +1,23 @@
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 
+const getNumberEnv = (name: string, fallback: number): number => {
+  const value = Number(process.env[name]);
+
+  if (Number.isNaN(value) || value <= 0) {
+    return fallback;
+  }
+
+  return value;
+};
+
+const getChunkingConfig = () => {
+  return {
+    chunkSize: getNumberEnv('CHUNK_SIZE', 1000),
+    chunkOverlap: getNumberEnv('CHUNK_OVERLAP', 150),
+    minChunkLength: getNumberEnv('CHUNK_MIN_LENGTH', 120),
+  };
+};
+
 const collapseSpacedLetters = (text: string): string => {
   return text
     .split('\n')
@@ -56,13 +74,12 @@ export const cleanText = (text: string): string => {
 };
 
 export const splitTextIntoChunks = async (
-  text: string,
-  chunkSize = 1000,
-  chunkOverlap = 150
+  text: string
 ): Promise<string[]> => {
+  const config = getChunkingConfig();
   const splitter = new RecursiveCharacterTextSplitter({
-    chunkSize,
-    chunkOverlap,
+    chunkSize: config.chunkSize,
+    chunkOverlap: config.chunkOverlap,
     separators: ['\n\n', '\n', '. ', '? ', '! ', ' ', ''],
   });
 
@@ -70,5 +87,5 @@ export const splitTextIntoChunks = async (
 
   return chunks
     .map((chunk) => chunk.trim())
-    .filter((chunk) => chunk.length >= 120 || chunks.length === 1);
+    .filter((chunk) => chunk.length >= config.minChunkLength || chunks.length === 1);
 };
