@@ -199,6 +199,10 @@ EMBEDDING_MODEL=text-embedding-3-small
 EMBEDDING_DIMENSIONS=1536
 CHAT_MODEL=gpt-4o-mini
 
+CHUNK_SIZE=1000
+CHUNK_OVERLAP=150
+CHUNK_MIN_LENGTH=120
+
 QDRANT_URL=http://localhost:6333
 QDRANT_API_KEY=
 QDRANT_COLLECTION=document_chunks
@@ -310,6 +314,7 @@ The frontend uses route-level code splitting, so page bundles are loaded only wh
 - Set `CORS_ORIGIN` to your deployed frontend URL before shipping the API anywhere public.
 - Set `RETRIEVAL_DEBUG=true` when you want to inspect candidate and selected chunk scores in the server logs.
 - Tune `RETRIEVAL_CANDIDATE_LIMIT` and `RETRIEVAL_SCORE_CUTOFF` when experimenting with retrieval quality.
+- Tune `CHUNK_SIZE`, `CHUNK_OVERLAP`, and `CHUNK_MIN_LENGTH` when changing how documents are split.
 - Use the chunk inspector when retrieval feels weird. Bad answers often start with bad chunks, not bad models.
 - Watch both word count and character count when tuning chunks. PDFs with weird spacing can make one metric lie.
 - Better chunks usually matter more than bigger prompts.
