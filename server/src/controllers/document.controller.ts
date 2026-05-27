@@ -27,7 +27,7 @@ export const uploadDocument = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const title = req.body.title || req.file.originalname;
+    const title = req.body.title?.trim() || req.file.originalname;
     const filePath = path.join('uploads', req.file.filename);
 
     const document = await DocumentModel.create({
