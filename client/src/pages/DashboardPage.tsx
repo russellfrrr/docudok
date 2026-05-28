@@ -25,6 +25,10 @@ import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AppLogo } from '@/components/layout/AppLogo';
 import { DocumentStatusBadge } from '@/components/document/DocumentStatusBadge';
+import {
+  getDocumentFailureMessage,
+  getDocumentStatusSummary,
+} from '@/lib/document';
 import { formatDate, formatFileSize } from '@/lib/format';
 import {
   Card,
@@ -350,15 +354,11 @@ export const DashboardPage = () => {
                   <CardContent className="flex items-center justify-between text-sm text-muted-foreground">
                     <div className="min-w-0">
                       <p>
-                        {isReady
-                          ? `${document.totalChunks} chunks`
-                          : document.status === 'processing'
-                            ? 'Processing document'
-                            : 'Upload failed'}
+                        {getDocumentStatusSummary(document)}
                       </p>
                       {document.status === 'failed' && document.processingError && (
                         <p className="mt-1 truncate text-xs text-destructive">
-                          {document.processingError}
+                          {getDocumentFailureMessage(document)}
                         </p>
                       )}
                     </div>
