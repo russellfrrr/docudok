@@ -43,6 +43,7 @@ const SUGGESTED_QUESTIONS = [
   'What are the most important details?',
   'What should I review carefully?',
 ];
+const MAX_MESSAGE_LENGTH = 2000;
 
 export const DocumentChatPage = () => {
   const { documentId } = useParams();
@@ -98,6 +99,10 @@ export const DocumentChatPage = () => {
         throw new Error('Message is required');
       }
 
+      if (message.length > MAX_MESSAGE_LENGTH) {
+        throw new Error(`Message must be ${MAX_MESSAGE_LENGTH} characters or fewer`);
+      }
+
       return sendMessage({
         chatId: selectedChatId,
         content: message.trim(),
@@ -142,6 +147,7 @@ export const DocumentChatPage = () => {
     hasSelectedChat && !hasMessages && !messagesQuery.isLoading;
   const inputIsDisabled =
     !selectedChatId || !documentIsReady || sendMessageMutation.isPending;
+  const messageIsTooLong = message.length > MAX_MESSAGE_LENGTH;
 
   const getScoreLabel = (score: number) => {
     if (score >= 0.75) {
@@ -467,13 +473,14 @@ export const DocumentChatPage = () => {
                     onChange={(event) => setMessage(event.target.value)}
                     placeholder="Ask a question about this document"
                     className="border-0 bg-transparent shadow-none focus-visible:ring-0"
+                    maxLength={MAX_MESSAGE_LENGTH + 1}
                     disabled={inputIsDisabled}
                   />
 
                   <Button
                     type="submit"
                     className="sm:w-fit"
-                    disabled={inputIsDisabled || !message.trim()}
+                    disabled={inputIsDisabled || !message.trim() || messageIsTooLong}
                   >
                     {sendMessageMutation.isPending ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -483,6 +490,9 @@ export const DocumentChatPage = () => {
                     {sendMessageMutation.isPending ? 'Thinking...' : 'Send'}
                   </Button>
                 </form>
+                <div className="mt-2 text-right text-xs text-muted-foreground">
+                  {message.length}/{MAX_MESSAGE_LENGTH}
+                </div>
               </div>
             </CardContent>
             ) : (
