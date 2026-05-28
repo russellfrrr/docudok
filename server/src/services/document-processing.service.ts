@@ -5,6 +5,7 @@ import { extractTextFromPdf } from './pdf.service';
 import { createEmbedding } from './embedding.service';
 import { deleteDocumentVectors, saveChunkVectors } from './vector.service';
 import { cleanText, splitTextIntoChunks } from '../utils/text';
+import { getErrorMessage } from '../utils/error';
 
 interface ProcessDocumentInput {
   documentId: string;
@@ -84,8 +85,7 @@ export const processDocument = async ({
   } catch (err) {
     console.error('Process document failed', err);
 
-    const message =
-      err instanceof Error ? err.message : 'Document processing failed';
+    const message = getErrorMessage(err, 'Document processing failed');
 
     await DocumentModel.findByIdAndUpdate(documentId, {
       status: 'failed',
