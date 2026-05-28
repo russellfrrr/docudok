@@ -31,6 +31,10 @@ import {
 } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { copyToClipboard } from '@/lib/clipboard';
+import {
+  getDocumentFailureMessage,
+  getDocumentStatusSummary,
+} from '@/lib/document';
 import { formatDate, formatNumber } from '@/lib/format';
 import { countWords } from '@/lib/text-stats';
 
@@ -192,14 +196,9 @@ export const DocumentChatPage = () => {
                 {document?.title || 'Document'}
               </h1>
               <p className="mt-1 text-sm text-muted-foreground">
-                {documentIsReady
-                  ? `${document.totalChunks} chunks indexed`
-                  : document?.status === 'processing'
-                    ? 'Processing document before chat is available'
-                    : document?.status === 'failed'
-                      ? document.processingError ||
-                        'Processing failed. Retry from the dashboard.'
-                      : 'Loading document details'}
+                {document
+                  ? getDocumentStatusSummary(document)
+                  : 'Loading document details'}
               </p>
             </div>
 
@@ -305,8 +304,7 @@ export const DocumentChatPage = () => {
                   <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>
-                      {document.processingError ||
-                        'Document processing failed. Retry it from the dashboard.'}
+                      {getDocumentFailureMessage(document)}
                     </AlertDescription>
                   </Alert>
                 )}
