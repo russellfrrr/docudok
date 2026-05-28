@@ -1,5 +1,6 @@
 import { createEmbedding } from './embedding.service';
 import { SearchResult, searchDocumentChunks } from './vector.service';
+import { getNumberEnv } from '../utils/env';
 
 interface RetrieveDocumentSourcesInput {
   question: string;
@@ -15,16 +16,6 @@ interface RetrievalDebugConfig {
   minSourceCount: number;
   relativeScoreCutoff: number;
 }
-
-const getNumberEnv = (name: string, fallback: number): number => {
-  const value = Number(process.env[name]);
-
-  if (Number.isNaN(value) || value <= 0) {
-    return fallback;
-  }
-
-  return value;
-};
 
 const getRetrievalConfig = () => {
   return {
