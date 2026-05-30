@@ -19,6 +19,15 @@ export const errorMiddleware: ErrorRequestHandler = (err, req, res, next) => {
     return res.status(400).json({ message: err.message });
   }
 
-  console.error('Unhandled API error', err);
-  return res.status(500).json({ message: 'Internal server error' });
+  const requestId = res.locals.requestId;
+
+  console.error('Unhandled API error', {
+    requestId,
+    error: err,
+  });
+
+  return res.status(500).json({
+    message: 'Internal server error',
+    requestId,
+  });
 };

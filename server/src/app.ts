@@ -4,6 +4,7 @@ import authRouter from './routes/auth.routes';
 import docsRouter from './routes/document.routes';
 import chatRouter from './routes/chat.routes';
 import { errorMiddleware } from './middleware/error.middleware';
+import { requestIdMiddleware } from './middleware/request-id.middleware';
 import { securityMiddleware } from './middleware/security.middleware';
 
 const app = express();
@@ -14,6 +15,7 @@ app.use(
     origin: corsOrigin,
   })
 );
+app.use(requestIdMiddleware);
 app.use(securityMiddleware);
 app.use(express.json());
 
@@ -23,6 +25,7 @@ app.get('/api/health', (req, res) => {
     service: 'docudok-api',
     environment: process.env.NODE_ENV || 'development',
     uptimeSeconds: Math.round(process.uptime()),
+    requestId: res.locals.requestId,
     timestamp: new Date().toISOString(),
   });
 });
