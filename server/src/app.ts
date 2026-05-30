@@ -4,6 +4,7 @@ import authRouter from './routes/auth.routes';
 import docsRouter from './routes/document.routes';
 import chatRouter from './routes/chat.routes';
 import { errorMiddleware } from './middleware/error.middleware';
+import { securityMiddleware } from './middleware/security.middleware';
 
 const app = express();
 const corsOrigin = process.env.CORS_ORIGIN || '*';
@@ -13,6 +14,7 @@ app.use(
     origin: corsOrigin,
   })
 );
+app.use(securityMiddleware);
 app.use(express.json());
 
 app.get('/api/health', (req, res) => {
