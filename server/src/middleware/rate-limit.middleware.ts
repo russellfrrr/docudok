@@ -23,17 +23,33 @@ export const createRateLimitMiddleware = ({
     const current = rateLimitStore.get(key);
 
     if (!current || current.resetAt <= now) {
+      const resetAt = now + windowMs;
+
       rateLimitStore.set(key, {
         count: 1,
-        resetAt: now + windowMs,
+        resetAt,
       });
+
+      res.setHeader('RateLimit-Limit', maxRequests.toString());
+      res.setHeader('RateLimit-Remaining', (maxRequests - 1).toString());
+      res.setHeader('RateLimit-Reset', Math.ceil(resetAt / 1000).toString());
 
       return next();
     }
 
+    const remaining = Math.max(maxRequests - current.count, 0);
+    const retryAfterSeconds = Math.ceil((current.resetAt - now) / 1000);
+
+    res.setHeader('RateLimit-Limit', maxRequests.toString());
+    res.setHeader('RateLimit-Remaining', remaining.toString());
+    res.setHeader('RateLimit-Reset', Math.ceil(current.resetAt / 1000).toString());
+
     if (current.count >= maxRequests) {
+      res.setHeader('Retry-After', retryAfterSeconds.toString());
+
       return res.status(429).json({
         message: 'Too many requests. Please try again later.',
+        retryAfterSeconds,
       });
     }
 
