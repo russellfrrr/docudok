@@ -64,6 +64,7 @@ So expect:
 
 - [x] Register/login authentication
 - [x] JWT-protected routes
+- [x] Auth input validation and basic rate limiting
 - [x] PDF upload
 - [x] Background document processing
 - [x] PDF text extraction
@@ -314,6 +315,8 @@ The frontend uses route-level code splitting, so page bundles are loaded only wh
 - Existing documents need to be retried or re-uploaded when chunking logic changes.
 - Source scores are vector similarity scores, not grades.
 - Set `CORS_ORIGIN` to your deployed frontend URL before shipping the API anywhere public.
+- API errors may include a request ID, which helps match frontend errors with backend logs.
+- Auth routes return rate-limit headers and can be tuned with `AUTH_RATE_LIMIT_WINDOW_MS` and `AUTH_RATE_LIMIT_MAX_REQUESTS`.
 - Set `RETRIEVAL_DEBUG=true` when you want to inspect candidate and selected chunk scores in the server logs.
 - Tune `RETRIEVAL_CANDIDATE_LIMIT` and `RETRIEVAL_SCORE_CUTOFF` when experimenting with retrieval quality.
 - Tune `CHUNK_SIZE`, `CHUNK_OVERLAP`, and `CHUNK_MIN_LENGTH` when changing how documents are split.
