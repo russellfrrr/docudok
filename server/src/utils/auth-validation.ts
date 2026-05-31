@@ -12,6 +12,9 @@ interface LoginInput {
 export class AuthValidationError extends Error {}
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const maxNameLength = 80;
+const minPasswordLength = 8;
+const maxPasswordLength = 128;
 
 export const validateRegisterInput = (body: unknown): RegisterInput => {
   const input = body as Partial<RegisterInput>;
@@ -27,8 +30,20 @@ export const validateRegisterInput = (body: unknown): RegisterInput => {
     throw new AuthValidationError('Please enter a valid email address');
   }
 
-  if (password.length < 8) {
-    throw new AuthValidationError('Password must be at least 8 characters');
+  if (name.length > maxNameLength) {
+    throw new AuthValidationError(`Name must be ${maxNameLength} characters or fewer`);
+  }
+
+  if (password.length < minPasswordLength) {
+    throw new AuthValidationError(
+      `Password must be at least ${minPasswordLength} characters`
+    );
+  }
+
+  if (password.length > maxPasswordLength) {
+    throw new AuthValidationError(
+      `Password must be ${maxPasswordLength} characters or fewer`
+    );
   }
 
   return { name, email, password };
