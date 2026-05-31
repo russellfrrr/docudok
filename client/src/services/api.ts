@@ -19,13 +19,17 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error.response?.status;
+    const requestId = error.response?.data?.requestId;
     const message =
-    error.response?.data?.message || error.message || 'Something went wrong';
+      error.response?.data?.message || error.message || 'Something went wrong';
+    const messageWithRequestId = requestId
+      ? `${message} (Request ID: ${requestId})`
+      : message;
 
     if (status === 401) {
       useAuthStore.getState().logout();
     }
 
-    return Promise.reject(new Error(message));
+    return Promise.reject(new Error(messageWithRequestId));
   }
 );
