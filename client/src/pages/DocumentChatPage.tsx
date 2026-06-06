@@ -479,8 +479,13 @@ export const DocumentChatPage = () => {
                     {sendMessageMutation.isPending ? 'Thinking...' : 'Send'}
                   </Button>
                 </form>
-                <div className="mt-2 text-right text-xs text-muted-foreground">
+                <div
+                  className={`mt-2 text-right text-xs ${
+                    messageIsTooLong ? 'text-destructive' : 'text-muted-foreground'
+                  }`}
+                >
                   {message.length}/{MAX_MESSAGE_LENGTH}
+                  {messageIsTooLong && ' - message is too long'}
                 </div>
               </div>
             </CardContent>
