@@ -13,6 +13,7 @@ import { retrieveDocumentSources } from '../services/retrieval.service';
 import {
   DocumentValidationError,
   validateDocumentTitle,
+  validateQuestion,
 } from '../utils/document-validation';
 import { countWords } from '../utils/text-stats';
 
@@ -256,11 +257,7 @@ export const searchDocument = async (req: AuthRequest, res: Response) => {
       return res.status(401).json({ message: 'Not authorized' });
     }
 
-    const { question } = req.body;
-
-    if (!question) {
-      return res.status(400).json({ message: 'Question is required' });
-    }
+    const question = validateQuestion(req.body);
 
     const document = await DocumentModel.findOne({
       _id: req.params.id,
@@ -280,6 +277,10 @@ export const searchDocument = async (req: AuthRequest, res: Response) => {
 
     res.json({ sources });
   } catch (err) {
+    if (err instanceof DocumentValidationError) {
+      return res.status(400).json({ message: err.message });
+    }
+
     console.error('Search document failed', err);
     res.status(500).json({ message: 'Search document failed' });
   }
@@ -291,11 +292,7 @@ export const askDocument = async (req: AuthRequest, res: Response) => {
       return res.status(401).json({ message: 'Not authorized' });
     }
 
-    const { question } = req.body;
-
-    if (!question) {
-      return res.status(400).json({ message: 'Question is required' });
-    }
+    const question = validateQuestion(req.body);
 
     const document = await DocumentModel.findOne({
       _id: req.params.id,
@@ -317,6 +314,10 @@ export const askDocument = async (req: AuthRequest, res: Response) => {
 
     res.json({ answer, sources });
   } catch (err) {
+    if (err instanceof DocumentValidationError) {
+      return res.status(400).json({ message: err.message });
+    }
+
     console.error('Ask document failed', err);
     res.status(500).json({ message: 'Ask document failed '});
   }
