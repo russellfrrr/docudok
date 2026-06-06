@@ -66,6 +66,7 @@ So expect:
 - [x] JWT-protected routes
 - [x] Auth input validation and basic rate limiting
 - [x] PDF upload
+- [x] Document title and question validation
 - [x] Background document processing
 - [x] PDF text extraction
 - [x] Text cleanup and chunking
@@ -317,6 +318,7 @@ The frontend uses route-level code splitting, so page bundles are loaded only wh
 - Set `CORS_ORIGIN` to your deployed frontend URL before shipping the API anywhere public.
 - API errors may include a request ID, which helps match frontend errors with backend logs.
 - Auth routes return rate-limit headers and can be tuned with `AUTH_RATE_LIMIT_WINDOW_MS` and `AUTH_RATE_LIMIT_MAX_REQUESTS`.
+- Document titles are capped at 120 characters, and document questions are capped at 2,000 characters.
 - Set `RETRIEVAL_DEBUG=true` when you want to inspect candidate and selected chunk scores in the server logs.
 - Tune `RETRIEVAL_CANDIDATE_LIMIT` and `RETRIEVAL_SCORE_CUTOFF` when experimenting with retrieval quality.
 - Tune `CHUNK_SIZE`, `CHUNK_OVERLAP`, and `CHUNK_MIN_LENGTH` when changing how documents are split.
