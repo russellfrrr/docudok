@@ -10,6 +10,10 @@ import { deleteDocumentVectors } from '../services/vector.service';
 import { generateAnswer } from '../services/ai.service';
 import { processDocument } from '../services/document-processing.service';
 import { retrieveDocumentSources } from '../services/retrieval.service';
+import {
+  DocumentValidationError,
+  validateDocumentTitle,
+} from '../utils/document-validation';
 import { countWords } from '../utils/text-stats';
 
 
@@ -27,7 +31,7 @@ export const uploadDocument = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const title = req.body.title?.trim() || req.file.originalname;
+    const title = validateDocumentTitle(req.body.title, req.file.originalname);
     const filePath = path.join('uploads', req.file.filename);
 
     const document = await DocumentModel.create({
@@ -49,6 +53,10 @@ export const uploadDocument = async (req: AuthRequest, res: Response) => {
 
     res.status(201).json({ document });
   } catch (err) {
+    if (err instanceof DocumentValidationError) {
+      return res.status(400).json({ message: err.message });
+    }
+
     console.error('Upload document failed', err);
     res.status(500).json({ message: 'Upload document failed' });
   }
