@@ -36,6 +36,7 @@ import {
   getDocumentStatusSummary,
 } from '@/lib/document';
 import { formatDate, formatNumber } from '@/lib/format';
+import { getSourceScoreLabel } from '@/lib/source-score';
 import { countWords } from '@/lib/text-stats';
 
 const SUGGESTED_QUESTIONS = [
@@ -148,18 +149,6 @@ export const DocumentChatPage = () => {
   const inputIsDisabled =
     !selectedChatId || !documentIsReady || sendMessageMutation.isPending;
   const messageIsTooLong = message.length > MAX_MESSAGE_LENGTH;
-
-  const getScoreLabel = (score: number) => {
-    if (score >= 0.75) {
-      return 'strong match';
-    }
-
-    if (score >= 0.5) {
-      return 'possible match';
-    }
-
-    return 'weak match';
-  };
 
   const handleCopyText = async (copyId: string, text: string) => {
     await copyToClipboard(text);
@@ -407,7 +396,7 @@ export const DocumentChatPage = () => {
                                     <span>
                                       Source {index + 1} - Chunk {source.chunkIndex} -
                                       Score {source.score.toFixed(3)} -{' '}
-                                      {getScoreLabel(source.score)}
+                                      {getSourceScoreLabel(source.score)}
                                     </span>
                                     <Button
                                       type="button"
@@ -583,7 +572,7 @@ export const DocumentChatPage = () => {
                               <span>
                                 Source {index + 1} - Chunk {source.chunkIndex} -
                                 Score {source.score.toFixed(3)} -{' '}
-                                {getScoreLabel(source.score)}
+                                {getSourceScoreLabel(source.score)}
                               </span>
                               <Button
                                 type="button"
