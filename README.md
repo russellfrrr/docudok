@@ -313,8 +313,9 @@ The frontend uses route-level code splitting, so page bundles are loaded only wh
 
 ## Notes To Future Me
 
-- Existing documents need to be retried or re-uploaded when chunking logic changes.
+- Existing documents need to be retried or re-uploaded when cleaning or chunking logic changes.
 - Source scores are vector similarity scores, not grades.
+- Source cards show relative relevance beside the raw vector score. Low raw scores can still be the best match for a short or messy document.
 - Set `CORS_ORIGIN` to your deployed frontend URL before shipping the API anywhere public.
 - API errors may include a request ID, which helps match frontend errors with backend logs.
 - Auth routes return rate-limit headers and can be tuned with `AUTH_RATE_LIMIT_WINDOW_MS` and `AUTH_RATE_LIMIT_MAX_REQUESTS`.

@@ -36,7 +36,7 @@ import {
   getDocumentStatusSummary,
 } from '@/lib/document';
 import { formatDate, formatNumber } from '@/lib/format';
-import { getSourceScoreLabel } from '@/lib/source-score';
+import { formatSourceScore, getSourceScoreLabel } from '@/lib/source-score';
 import { countWords } from '@/lib/text-stats';
 
 const SUGGESTED_QUESTIONS = [
@@ -395,8 +395,10 @@ export const DocumentChatPage = () => {
                                   <div className="mb-1 flex items-center justify-between gap-2 text-xs text-muted-foreground">
                                     <span>
                                       Source {index + 1} - Chunk {source.chunkIndex} -
-                                      Score {source.score.toFixed(3)} -{' '}
-                                      {getSourceScoreLabel(source.score)}
+                                      {' '}
+                                      {formatSourceScore(source.score, source.relevanceScore)}
+                                      {' - '}
+                                      {getSourceScoreLabel(source.relevanceScore)}
                                     </span>
                                     <Button
                                       type="button"
@@ -576,8 +578,10 @@ export const DocumentChatPage = () => {
                             <div className="mb-1 flex items-center justify-between gap-2 text-xs text-muted-foreground">
                               <span>
                                 Source {index + 1} - Chunk {source.chunkIndex} -
-                                Score {source.score.toFixed(3)} -{' '}
-                                {getSourceScoreLabel(source.score)}
+                                {' '}
+                                {formatSourceScore(source.score, source.relevanceScore)}
+                                {' - '}
+                                {getSourceScoreLabel(source.relevanceScore)}
                               </span>
                               <Button
                                 type="button"
