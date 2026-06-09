@@ -34,6 +34,7 @@ export interface SearchResult {
   chunkText: string;
   chunkIndex: number;
   score: number;
+  relevanceScore?: number;
 }
 
 export const searchDocumentChunks = async (

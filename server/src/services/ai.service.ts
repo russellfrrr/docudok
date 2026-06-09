@@ -13,6 +13,7 @@ export const generateAnswer = async (
         `Source ${index + 1}`,
         `Chunk: ${source.chunkIndex}`,
         `Similarity score: ${source.score.toFixed(3)}`,
+        `Relative relevance: ${source.relevanceScore?.toFixed(3) || '1.000'}`,
         `Text:\n${source.chunkText}`,
       ].join('\n');
     })

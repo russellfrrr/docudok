@@ -78,6 +78,24 @@ const selectBestSources = (
   return selectedSources.slice(0, sourceLimit);
 };
 
+const addRelativeRelevanceScores = (sources: SearchResult[]): SearchResult[] => {
+  const topScore = sources[0]?.score || 0;
+
+  return sources.map((source) => {
+    if (topScore <= 0) {
+      return {
+        ...source,
+        relevanceScore: 0,
+      };
+    }
+
+    return {
+      ...source,
+      relevanceScore: Number((source.score / topScore).toFixed(3)),
+    };
+  });
+};
+
 const logRetrievalDebug = (
   question: string,
   candidates: SearchResult[],
@@ -131,13 +149,14 @@ export const retrieveDocumentSources = async ({
     config.minSourceCount,
     config.relativeScoreCutoff
   );
+  const scoredSources = addRelativeRelevanceScores(selectedSources);
 
-  logRetrievalDebug(question, candidates, selectedSources, {
+  logRetrievalDebug(question, candidates, scoredSources, {
     sourceLimit: finalSourceLimit,
     candidateLimit: finalCandidateLimit,
     minSourceCount: config.minSourceCount,
     relativeScoreCutoff: config.relativeScoreCutoff,
   });
 
-  return selectedSources;
+  return scoredSources;
 };
