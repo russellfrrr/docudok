@@ -49,6 +49,41 @@ const normalizeParagraphs = (text: string): string => {
   return paragraphs.join('\n\n');
 };
 
+const removePdfArtifacts = (text: string): string => {
+  return text
+    .split('\n')
+    .filter((line) => {
+      const trimmedLine = line.trim();
+
+      if (!trimmedLine) {
+        return true;
+      }
+
+      if (/^[-–—]*\s*\d+\s+of\s+\d+\s*[-–—]*$/i.test(trimmedLine)) {
+        return false;
+      }
+
+      if (/^page\s+\d+(\s+of\s+\d+)?$/i.test(trimmedLine)) {
+        return false;
+      }
+
+      if (/^[\W_]+$/.test(trimmedLine)) {
+        return false;
+      }
+
+      return true;
+    })
+    .join('\n');
+};
+
+const cleanChunkText = (text: string): string => {
+  return text
+    .replace(/^[\s.,;:!?•\-–—]+/g, '')
+    .replace(/\s+([,.;:!?])/g, '$1')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+};
+
 export const cleanText = (text: string): string => {
   const normalizedNewlines = text.replace(/\r/g, '\n');
   const withoutSpacedLetters = collapseSpacedLetters(normalizedNewlines);
@@ -57,7 +92,9 @@ export const cleanText = (text: string): string => {
     '$1$2'
   );
 
-  return normalizeParagraphs(withoutHyphenLineBreaks)
+  const withoutPdfArtifacts = removePdfArtifacts(withoutHyphenLineBreaks);
+
+  return normalizeParagraphs(withoutPdfArtifacts)
     .replace(/[ \t]+/g, ' ')
     .replace(/\s+([,.;:!?])/g, '$1')
     .replace(/\n{3,}/g, '\n\n')
@@ -77,6 +114,6 @@ export const splitTextIntoChunks = async (
   const chunks = await splitter.splitText(text);
 
   return chunks
-    .map((chunk) => chunk.trim())
+    .map(cleanChunkText)
     .filter((chunk) => chunk.length >= config.minChunkLength || chunks.length === 1);
 };
