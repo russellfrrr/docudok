@@ -59,6 +59,31 @@ export const getChatsByDocument = async (req: AuthRequest, res: Response) => {
   }
 }
 
+export const deleteChat = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Not authorized' });
+    }
+
+    const chat = await ChatModel.findOneAndDelete({
+      _id: req.params.chatId,
+      userId: req.user.id,
+    });
+
+    if (!chat) {
+      return res.status(404).json({ message: 'Chat not found' });
+    }
+
+    // A chat owns its messages, so remove them when the chat is deleted.
+    await MessageModel.deleteMany({ chatId: chat._id });
+
+    res.json({ message: 'Chat deleted' });
+  } catch (err) {
+    console.error('Delete chat failed', err);
+    res.status(500).json({ message: 'Delete chat failed' });
+  }
+};
+
 export const sendMessage = async (req: AuthRequest, res: Response) => {
   try {
     if (!req.user) {

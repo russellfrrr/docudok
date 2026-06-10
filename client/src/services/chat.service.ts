@@ -29,6 +29,10 @@ export const getMessagesByChat = async (
   return response.data;
 }
 
+export const deleteChat = async (chatId: string): Promise<void> => {
+  await api.delete(`/chats/${chatId}`);
+}
+
 export const sendMessage = async (
   input: SendMessageInput
 ): Promise<SendMessageResponse> => {

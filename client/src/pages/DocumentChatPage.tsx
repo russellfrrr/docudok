@@ -12,9 +12,10 @@ import {
   Plus,
   Search,
   Send,
+  Trash2,
 } from 'lucide-react';
 import { getDocumentById, searchDocument } from '@/services/document.service';
-import { createChat, sendMessage } from '@/services/chat.service';
+import { createChat, deleteChat, sendMessage } from '@/services/chat.service';
 import { useChats } from '@/hooks/useChats';
 import { useDocumentChunks } from '@/hooks/useDocumentChunks';
 import { useMessages } from '@/hooks/useMessages';
@@ -86,6 +87,18 @@ export const DocumentChatPage = () => {
     },
     onSuccess: (data) => {
       setSelectedChatId(data.chat._id);
+      queryClient.invalidateQueries({ queryKey: ['chats', documentId] });
+    },
+  });
+
+  const deleteChatMutation = useMutation({
+    mutationFn: deleteChat,
+    onSuccess: (_data, deletedChatId) => {
+      if (selectedChatId === deletedChatId) {
+        setSelectedChatId(null);
+        queryClient.removeQueries({ queryKey: ['messages', deletedChatId] });
+      }
+
       queryClient.invalidateQueries({ queryKey: ['chats', documentId] });
     },
   });
@@ -162,6 +175,16 @@ export const DocumentChatPage = () => {
   const clearRetrievalTest = () => {
     setDebugQuestion('');
     searchMutation.reset();
+  };
+
+  const handleDeleteChat = (chatId: string) => {
+    const confirmed = window.confirm('Delete this chat? This cannot be undone.');
+
+    if (!confirmed) {
+      return;
+    }
+
+    deleteChatMutation.mutate(chatId);
   };
 
   return (
@@ -242,21 +265,62 @@ export const DocumentChatPage = () => {
                 </p>
               )}
 
-              {chats.map((chat) => (
-                <button
-                  key={chat._id}
-                  type="button"
-                  onClick={() => setSelectedChatId(chat._id)}
-                  className={`flex w-full items-center gap-2 rounded-md border px-3 py-2 text-left text-sm transition ${
-                    selectedChatId === chat._id
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-background hover:bg-accent'
-                  }`}
-                >
-                  <MessageSquare className="h-4 w-4" />
-                  <span className="truncate">{chat.title}</span>
-                </button>
-              ))}
+              {deleteChatMutation.isError && (
+                <Alert variant="destructive">
+                  <AlertDescription>
+                    {deleteChatMutation.error instanceof Error
+                      ? deleteChatMutation.error.message
+                      : 'Delete chat failed'}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {chats.map((chat) => {
+                const isSelected = selectedChatId === chat._id;
+                const isDeleting =
+                  deleteChatMutation.isPending &&
+                  deleteChatMutation.variables === chat._id;
+
+                return (
+                  <div
+                    key={chat._id}
+                    className={`flex items-center gap-1 rounded-md border px-2 py-1 transition ${
+                      isSelected
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-background hover:bg-accent'
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setSelectedChatId(chat._id)}
+                      className="flex min-w-0 flex-1 items-center gap-2 px-1 py-1 text-left text-sm"
+                    >
+                      <MessageSquare className="h-4 w-4 shrink-0" />
+                      <span className="truncate">{chat.title}</span>
+                    </button>
+
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className={`h-7 w-7 shrink-0 ${
+                        isSelected
+                          ? 'text-primary-foreground/80 hover:bg-primary-foreground/10 hover:text-primary-foreground'
+                          : 'text-muted-foreground hover:text-destructive'
+                      }`}
+                      onClick={() => handleDeleteChat(chat._id)}
+                      disabled={isDeleting}
+                      aria-label={`Delete ${chat.title}`}
+                    >
+                      {isDeleting ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                );
+              })}
             </CardContent>
           </Card>
         </aside>
