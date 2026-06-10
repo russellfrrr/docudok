@@ -23,6 +23,7 @@ import type { Chat } from '@/types/chat';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AppLogo } from '@/components/layout/AppLogo';
+import { ThemeToggle } from '@/components/layout/ThemeToggle';
 import { DocumentStatusBadge } from '@/components/document/DocumentStatusBadge';
 import {
   Card,
@@ -212,12 +213,16 @@ export const DocumentChatPage = () => {
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4">
           <AppLogo />
 
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/">
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/">
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </Link>
+            </Button>
+          </div>
         </div>
 
         <div className="mx-auto max-w-6xl px-4 pb-5">

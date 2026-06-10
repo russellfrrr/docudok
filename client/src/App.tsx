@@ -1,8 +1,9 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getMe } from '@/services/auth.service';
 import { useAuthStore } from '@/store/auth.store';
+import { useThemeStore } from '@/store/theme.store';
 import { PageLoading } from '@/components/layout/PageLoading';
 
 const LoginPage = lazy(() =>
@@ -29,6 +30,11 @@ const DocumentChatPage = lazy(() =>
 export const App = () => {
   const token = useAuthStore((state) => state.token);
   const setUser = useAuthStore((state) => state.setUser);
+  const theme = useThemeStore((state) => state.theme);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+  }, [theme]);
 
   useQuery({
     queryKey: ['me'],

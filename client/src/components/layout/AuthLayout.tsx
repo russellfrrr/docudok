@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { FileText, MessageSquareText, Search } from 'lucide-react';
 import { AppLogo } from './AppLogo';
+import { ThemeToggle } from './ThemeToggle';
 import { motion } from 'motion/react';
 
 interface AuthLayoutProps {
@@ -18,7 +19,10 @@ export const AuthLayout = ({
     <main className="grid min-h-screen bg-muted lg:grid-cols-[minmax(420px,0.85fr)_1.15fr]">
       <section className="flex items-center justify-center px-4 py-10">
         <div className="w-full max-w-sm space-y-8">
-          <AppLogo />
+          <div className="flex items-center justify-between gap-4">
+            <AppLogo />
+            <ThemeToggle />
+          </div>
 
           <div className="space-y-2">
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">

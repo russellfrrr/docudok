@@ -24,6 +24,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AppLogo } from '@/components/layout/AppLogo';
+import { ThemeToggle } from '@/components/layout/ThemeToggle';
 import { DocumentStatusBadge } from '@/components/document/DocumentStatusBadge';
 import {
   getDocumentFailureMessage,
@@ -154,6 +155,8 @@ export const DashboardPage = () => {
                 {user.name}
               </span>
             )}
+
+            <ThemeToggle />
 
             <Button variant="outline" size="sm" onClick={handleLogout}>
               <LogOut className="h-4 w-4" />
