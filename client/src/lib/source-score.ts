@@ -14,12 +14,20 @@ export const getSourceScoreLabel = (relevanceScore?: number): string => {
   return 'loose match';
 };
 
-export const formatSourceScore = (score: number, relevanceScore?: number): string => {
+export const formatSourceScore = (
+  score: number,
+  relevanceScore?: number,
+  rerankScore?: number
+): string => {
   const rawScore = `raw ${score.toFixed(3)}`;
 
-  if (relevanceScore === undefined) {
-    return rawScore;
+  if (rerankScore !== undefined) {
+    return `${Math.round(rerankScore * 100)}% reranked - ${rawScore}`;
   }
 
-  return `${Math.round(relevanceScore * 100)}% relevance - ${rawScore}`;
+  if (relevanceScore !== undefined) {
+    return `${Math.round(relevanceScore * 100)}% relevance - ${rawScore}`;
+  }
+
+  return rawScore;
 };

@@ -396,7 +396,7 @@ export const DocumentChatPage = () => {
                                     <span>
                                       Source {index + 1} - Chunk {source.chunkIndex} -
                                       {' '}
-                                      {formatSourceScore(source.score, source.relevanceScore)}
+                                      {formatSourceScore(source.score, source.relevanceScore, source.rerankScore)}
                                       {' - '}
                                       {getSourceScoreLabel(source.relevanceScore)}
                                     </span>

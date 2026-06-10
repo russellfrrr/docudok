@@ -49,6 +49,7 @@ export interface SourceSnippet {
   chunkIndex: number;
   score: number;
   relevanceScore?: number;
+  rerankScore?: number;
 }
 
 export interface AskDocumentInput {
