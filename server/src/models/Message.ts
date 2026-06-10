@@ -5,6 +5,7 @@ export interface IMessageSource {
   chunkIndex: number;
   score: number;
   relevanceScore?: number;
+  rerankScore?: number;
 }
 
 export interface IMessage extends Document {
@@ -30,6 +31,9 @@ const messageSourceSchema = new Schema<IMessageSource>(
       required: true,
     },
     relevanceScore: {
+      type: Number,
+    },
+    rerankScore: {
       type: Number,
     },
   },

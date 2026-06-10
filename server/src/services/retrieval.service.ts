@@ -1,5 +1,6 @@
 import { createEmbedding } from './embedding.service';
 import { SearchResult, searchDocumentChunks } from './vector.service';
+import { rerankSources } from './rerank.service';
 import { getNumberEnv } from '../utils/env';
 
 interface RetrieveDocumentSourcesInput {
@@ -23,6 +24,9 @@ const getRetrievalConfig = () => {
     sourceLimit: getNumberEnv('RETRIEVAL_SOURCE_LIMIT', 5),
     candidateLimit: getNumberEnv('RETRIEVAL_CANDIDATE_LIMIT', 12),
     relativeScoreCutoff: getNumberEnv('RETRIEVAL_SCORE_CUTOFF', 0.7),
+    rerankingEnabled: process.env.RERANKING_ENABLED === 'true',
+    rerankingCandidateLimit: getNumberEnv('RERANKING_CANDIDATE_LIMIT', 15),
+    rerankingSourceLimit: getNumberEnv('RERANKING_SOURCE_LIMIT', 5),
   };
 };
 
@@ -129,7 +133,11 @@ export const retrieveDocumentSources = async ({
 }: RetrieveDocumentSourcesInput): Promise<SearchResult[]> => {
   const config = getRetrievalConfig();
   const finalSourceLimit = sourceLimit || config.sourceLimit;
-  const finalCandidateLimit = candidateLimit || config.candidateLimit;
+  const finalCandidateLimit =
+    candidateLimit ||
+    (config.rerankingEnabled
+      ? config.rerankingCandidateLimit
+      : config.candidateLimit);
   const questionVector = await createEmbedding(question);
 
   const candidates = await searchDocumentChunks(
@@ -149,7 +157,17 @@ export const retrieveDocumentSources = async ({
     config.minSourceCount,
     config.relativeScoreCutoff
   );
-  const scoredSources = addRelativeRelevanceScores(selectedSources);
+  const rerankedSources = config.rerankingEnabled
+    ? await rerankSources(
+        question,
+        dedupedSources.slice(0, finalCandidateLimit),
+        config.rerankingSourceLimit
+      )
+    : selectedSources;
+
+  const scoredSources = addRelativeRelevanceScores(
+    rerankedSources.slice(0, finalSourceLimit)
+  );
 
   logRetrievalDebug(question, candidates, scoredSources, {
     sourceLimit: finalSourceLimit,

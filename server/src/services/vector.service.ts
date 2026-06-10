@@ -35,6 +35,7 @@ export interface SearchResult {
   chunkIndex: number;
   score: number;
   relevanceScore?: number;
+  rerankScore?: number;
 }
 
 export const searchDocumentChunks = async (
