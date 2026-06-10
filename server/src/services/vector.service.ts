@@ -7,6 +7,22 @@ const qdrant = new QdrantClient({
 
 const collectionName = process.env.QDRANT_COLLECTION || 'document_chunks';
 
+const createPayloadIndexIfNeeded = async (fieldName: string) => {
+  try {
+    await qdrant.createPayloadIndex(collectionName, {
+      field_name: fieldName,
+      field_schema: 'keyword',
+      wait: true,
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : '';
+
+    if (!message.toLowerCase().includes('already exists')) {
+      console.warn(`Could not create Qdrant payload index for ${fieldName}`, err);
+    }
+  }
+};
+
 export const ensureVectorCollection = async () => {
   try {
     await qdrant.getCollection(collectionName);
@@ -18,6 +34,9 @@ export const ensureVectorCollection = async () => {
       },
     });
   }
+
+  await createPayloadIndexIfNeeded('userId');
+  await createPayloadIndexIfNeeded('documentId');
 }
 
 interface SaveVectorInput {
