@@ -103,12 +103,8 @@ export const DocumentChatPage = () => {
     },
   });
 
-  const sendMessageMutation = useMutation({
+  const askQuestionMutation = useMutation({
     mutationFn: async () => {
-      if (!selectedChatId) {
-        throw new Error('Create or select a chat first');
-      }
-
       if (!message.trim()) {
         throw new Error('Message is required');
       }
@@ -117,14 +113,37 @@ export const DocumentChatPage = () => {
         throw new Error(`Message must be ${MAX_MESSAGE_LENGTH} characters or fewer`);
       }
 
-      return sendMessage({
-        chatId: selectedChatId,
-        content: message.trim(),
+      const content = message.trim();
+      let chatId = selectedChatId;
+
+      if (!chatId) {
+        if (!documentId) {
+          throw new Error('Document ID is missing');
+        }
+
+        const chatTitle =
+          content.length > 48 ? `${content.slice(0, 48)}...` : content;
+
+        const newChat = await createChat({
+          documentId,
+          title: chatTitle,
+        });
+
+        chatId = newChat.chat._id;
+      }
+
+      const response = await sendMessage({
+        chatId,
+        content,
       });
+
+      return { chatId, response };
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      setSelectedChatId(data.chatId);
       setMessage('');
-      queryClient.invalidateQueries({ queryKey: ['messages', selectedChatId] });
+      queryClient.invalidateQueries({ queryKey: ['chats', documentId] });
+      queryClient.invalidateQueries({ queryKey: ['messages', data.chatId] });
     },
   });
 
@@ -144,7 +163,7 @@ export const DocumentChatPage = () => {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messagesQuery.data?.messages.length, sendMessageMutation.isPending]);
+  }, [messagesQuery.data?.messages.length, askQuestionMutation.isPending]);
 
   if (!documentId) {
     return <Navigate to="/" />;
@@ -160,7 +179,7 @@ export const DocumentChatPage = () => {
   const showEmptyChat =
     hasSelectedChat && !hasMessages && !messagesQuery.isLoading;
   const inputIsDisabled =
-    !selectedChatId || !documentIsReady || sendMessageMutation.isPending;
+    !documentIsReady || askQuestionMutation.isPending;
   const messageIsTooLong = message.length > MAX_MESSAGE_LENGTH;
 
   const handleCopyText = async (copyId: string, text: string) => {
@@ -227,22 +246,22 @@ export const DocumentChatPage = () => {
 
       <section className="mx-auto grid max-w-6xl gap-6 px-4 py-8 lg:grid-cols-[280px_1fr]">
         <aside className="space-y-4">
-          <Button
-            className="w-full"
-            onClick={() => createChatMutation.mutate()}
-            disabled={!documentIsReady || createChatMutation.isPending}
-          >
-            {createChatMutation.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Plus className="h-4 w-4" />
-            )}
-            New chat
-          </Button>
-
           <Card className="border bg-card shadow-sm">
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between gap-3">
               <CardTitle className="text-base">Chats</CardTitle>
+
+              <Button
+                size="sm"
+                onClick={() => createChatMutation.mutate()}
+                disabled={!documentIsReady || createChatMutation.isPending}
+              >
+                {createChatMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Plus className="h-4 w-4" />
+                )}
+                New
+              </Button>
             </CardHeader>
 
             <CardContent className="space-y-2">
@@ -375,8 +394,8 @@ export const DocumentChatPage = () => {
                       Ask a question about this document
                     </h2>
                     <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-                      Create a chat when the document is ready, then ask anything
-                      that can be answered from its contents.
+                      Type below to start a new chat, or create one from the
+                      chat list.
                     </p>
                   </div>
                 )}
@@ -492,11 +511,11 @@ export const DocumentChatPage = () => {
                   </div>
                 ))}
 
-                {sendMessageMutation.isError && (
+                {askQuestionMutation.isError && (
                   <Alert variant="destructive">
                     <AlertDescription>
-                      {sendMessageMutation.error instanceof Error
-                        ? sendMessageMutation.error.message
+                      {askQuestionMutation.error instanceof Error
+                        ? askQuestionMutation.error.message
                         : 'Send message failed'}
                     </AlertDescription>
                   </Alert>
@@ -520,7 +539,7 @@ export const DocumentChatPage = () => {
                   className="flex flex-col gap-3 rounded-lg border bg-card p-2 sm:flex-row"
                   onSubmit={(event) => {
                     event.preventDefault();
-                    sendMessageMutation.mutate();
+                    askQuestionMutation.mutate();
                   }}
                 >
                   <Input
@@ -537,12 +556,12 @@ export const DocumentChatPage = () => {
                     className="sm:w-fit"
                     disabled={inputIsDisabled || !message.trim() || messageIsTooLong}
                   >
-                    {sendMessageMutation.isPending ? (
+                    {askQuestionMutation.isPending ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       <Send className="h-4 w-4" />
                     )}
-                    {sendMessageMutation.isPending ? 'Thinking...' : 'Send'}
+                    {askQuestionMutation.isPending ? 'Thinking...' : 'Send'}
                   </Button>
                 </form>
                 <div
