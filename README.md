@@ -70,6 +70,7 @@ So expect:
 - [x] Background document processing
 - [x] PDF text extraction
 - [x] Text cleanup and chunking
+- [x] PDF artifact cleanup for cleaner chunks
 - [x] LangChain-powered text splitting
 - [x] Embedding generation
 - [x] Vector storage with Qdrant
@@ -330,6 +331,7 @@ The frontend uses route-level code splitting, so page bundles are loaded only wh
 - Reranking retrieves more Qdrant candidates first, then asks the LLM to choose the best sources before answering.
 - Tune `RERANKING_CANDIDATE_LIMIT` and `RERANKING_SOURCE_LIMIT` when experimenting with reranked retrieval.
 - Tune `CHUNK_SIZE`, `CHUNK_OVERLAP`, and `CHUNK_MIN_LENGTH` when changing how documents are split.
+- Chunk cleanup removes common PDF artifacts and keeps code-like lines separate from prose so embeddings get cleaner context.
 - Use the chunk inspector when retrieval feels weird. Bad answers often start with bad chunks, not bad models.
 - Watch both word count and character count when tuning chunks. PDFs with weird spacing can make one metric lie.
 - Better chunks usually matter more than bigger prompts.
