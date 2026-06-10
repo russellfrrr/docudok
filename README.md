@@ -127,6 +127,7 @@ PDF Upload
    -> Store vectors in Qdrant
    -> Embed the user's question
    -> Retrieve relevant chunks
+   -> Rerank candidate chunks when reranking is enabled
    -> Inspect retrieval behavior while debugging
    -> Send context + question to the LLM
    -> Return answer with sources
@@ -216,6 +217,10 @@ RETRIEVAL_MIN_SOURCES=3
 RETRIEVAL_SOURCE_LIMIT=5
 RETRIEVAL_CANDIDATE_LIMIT=12
 RETRIEVAL_SCORE_CUTOFF=0.7
+
+RERANKING_ENABLED=true
+RERANKING_CANDIDATE_LIMIT=15
+RERANKING_SOURCE_LIMIT=5
 ```
 
 Create `client/.env`:
@@ -322,6 +327,8 @@ The frontend uses route-level code splitting, so page bundles are loaded only wh
 - Document titles are capped at 120 characters, and document questions are capped at 2,000 characters.
 - Set `RETRIEVAL_DEBUG=true` when you want to inspect candidate and selected chunk scores in the server logs.
 - Tune `RETRIEVAL_CANDIDATE_LIMIT` and `RETRIEVAL_SCORE_CUTOFF` when experimenting with retrieval quality.
+- Reranking retrieves more Qdrant candidates first, then asks the LLM to choose the best sources before answering.
+- Tune `RERANKING_CANDIDATE_LIMIT` and `RERANKING_SOURCE_LIMIT` when experimenting with reranked retrieval.
 - Tune `CHUNK_SIZE`, `CHUNK_OVERLAP`, and `CHUNK_MIN_LENGTH` when changing how documents are split.
 - Use the chunk inspector when retrieval feels weird. Bad answers often start with bad chunks, not bad models.
 - Watch both word count and character count when tuning chunks. PDFs with weird spacing can make one metric lie.
