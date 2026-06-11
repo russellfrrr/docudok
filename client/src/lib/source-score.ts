@@ -17,12 +17,20 @@ export const getSourceScoreLabel = (relevanceScore?: number): string => {
 export const formatSourceScore = (
   score: number,
   relevanceScore?: number,
-  rerankScore?: number
+  rerankScore?: number,
+  keywordScore?: number,
+  finalScore?: number,
 ): string => {
-  const rawScore = `raw ${score.toFixed(3)}`;
+  const rawScore = `vector ${score.toFixed(3)}`;
 
   if (rerankScore !== undefined) {
     return `${Math.round(rerankScore * 100)}% reranked - ${rawScore}`;
+  }
+
+  if (finalScore !== undefined) {
+    const keywordText = keywordScore !== undefined ? ` - keyword ${keywordScore.toFixed(3)}` : '';
+
+    return `final ${finalScore.toFixed(3)} - ${rawScore}${keywordText}`;
   }
 
   if (relevanceScore !== undefined) {

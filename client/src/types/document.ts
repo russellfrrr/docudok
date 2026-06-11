@@ -48,6 +48,8 @@ export interface SourceSnippet {
   chunkText: string;
   chunkIndex: number;
   score: number;
+  keywordScore?: number;
+  finalScore?: number;
   relevanceScore?: number;
   rerankScore?: number;
 }

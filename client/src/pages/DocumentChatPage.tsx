@@ -66,14 +66,11 @@ export const DocumentChatPage = () => {
   });
 
   const chatsQuery = useChats(documentId);
-  const messagesQuery = useMessages(selectedChatId);
+  const chats: Chat[] = chatsQuery.data?.chats || [];
+  const firstChatId = chats[0]?._id || null;
+  const activeChatId = selectedChatId || firstChatId;
+  const messagesQuery = useMessages(activeChatId);
   const chunksQuery = useDocumentChunks(documentId, activeView === 'chunks');
-
-  useEffect(() => {
-    if (!selectedChatId && chatsQuery.data?.chats.length) {
-      setSelectedChatId(chatsQuery.data.chats[0]._id);
-    }
-  }, [chatsQuery.data, selectedChatId]);
 
   const createChatMutation = useMutation({
     mutationFn: async () => {
@@ -115,7 +112,7 @@ export const DocumentChatPage = () => {
       }
 
       const content = message.trim();
-      let chatId = selectedChatId;
+      let chatId = activeChatId;
 
       if (!chatId) {
         if (!documentId) {
@@ -170,12 +167,11 @@ export const DocumentChatPage = () => {
     return <Navigate to="/" />;
   }
 
-  const chats: Chat[] = chatsQuery.data?.chats || [];
   const messages = messagesQuery.data?.messages || [];
   const document = documentQuery.data?.document;
   const documentIsReady = document?.status === 'ready';
   const documentFailed = document?.status === 'failed';
-  const hasSelectedChat = Boolean(selectedChatId);
+  const hasSelectedChat = Boolean(activeChatId);
   const hasMessages = messages.length > 0;
   const showEmptyChat =
     hasSelectedChat && !hasMessages && !messagesQuery.isLoading;
@@ -300,7 +296,7 @@ export const DocumentChatPage = () => {
               )}
 
               {chats.map((chat) => {
-                const isSelected = selectedChatId === chat._id;
+                const isSelected = activeChatId === chat._id;
                 const isDeleting =
                   deleteChatMutation.isPending &&
                   deleteChatMutation.variables === chat._id;
@@ -354,7 +350,7 @@ export const DocumentChatPage = () => {
             <CardHeader className="flex flex-row items-center justify-between gap-3 border-b">
               <CardTitle className="text-base">
                 {activeView === 'chat'
-                  ? selectedChatId
+                  ? activeChatId
                     ? 'Document assistant'
                     : 'Messages'
                   : 'Chunk inspector'}
@@ -392,7 +388,7 @@ export const DocumentChatPage = () => {
                   </Alert>
                 )}
 
-                {!selectedChatId && (
+                {!activeChatId && (
                   <div className="flex min-h-[360px] flex-col items-center justify-center rounded-md border bg-background p-6 text-center">
                     <MessageSquare className="mb-3 h-8 w-8 text-muted-foreground" />
                     <h2 className="text-base font-medium text-foreground">
@@ -484,7 +480,7 @@ export const DocumentChatPage = () => {
                                     <span>
                                       Source {index + 1} - Chunk {source.chunkIndex} -
                                       {' '}
-                                      {formatSourceScore(source.score, source.relevanceScore, source.rerankScore)}
+                                      {formatSourceScore(source.score, source.relevanceScore, source.rerankScore, source.keywordScore, source.finalScore)}
                                       {' - '}
                                       {getSourceScoreLabel(source.relevanceScore)}
                                     </span>

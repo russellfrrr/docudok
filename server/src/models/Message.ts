@@ -4,6 +4,8 @@ export interface IMessageSource {
   chunkText: string;
   chunkIndex: number;
   score: number;
+  keywordScore: number;
+  finalScore?: number;
   relevanceScore?: number;
   rerankScore?: number;
 }
@@ -29,6 +31,12 @@ const messageSourceSchema = new Schema<IMessageSource>(
     score: {
       type: Number,
       required: true,
+    },
+    keywordScore: {
+      type: Number,
+    },
+    finalScore: {
+      type: Number
     },
     relevanceScore: {
       type: Number,
