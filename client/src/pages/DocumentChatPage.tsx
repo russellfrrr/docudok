@@ -68,8 +68,6 @@ const MessageContent = ({
   const visibleText = enabled ? text.slice(0, visibleLength) : text;
 
   useEffect(() => {
-    setVisibleLength(enabled ? 0 : text.length);
-
     if (!enabled) {
       return;
     }
@@ -241,6 +239,16 @@ export const DocumentChatPage = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messagesQuery.data?.messages.length, askQuestionMutation.isPending]);
 
+  const handleTypingComplete = useCallback((messageId: string) => {
+    setTypingMessageId((currentMessageId) => {
+      if (currentMessageId !== messageId) {
+        return currentMessageId;
+      }
+
+      return null;
+    });
+  }, []);
+
   if (!documentId) {
     return <Navigate to="/" />;
   }
@@ -280,16 +288,6 @@ export const DocumentChatPage = () => {
       return [...currentIds, messageId];
     });
   };
-
-  const handleTypingComplete = useCallback((messageId: string) => {
-    setTypingMessageId((currentMessageId) => {
-      if (currentMessageId !== messageId) {
-        return currentMessageId;
-      }
-
-      return null;
-    });
-  }, []);
 
   const handleDeleteChat = (chatId: string) => {
     const confirmed = window.confirm('Delete this chat? This cannot be undone.');
