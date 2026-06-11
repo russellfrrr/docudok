@@ -5,6 +5,7 @@ import {
   AlertCircle,
   ArrowLeft,
   Check,
+  ChevronDown,
   Copy,
   FileText,
   Loader2,
@@ -58,6 +59,7 @@ export const DocumentChatPage = () => {
   const [activeView, setActiveView] = useState<'chat' | 'chunks'>('chat');
   const [debugQuestion, setDebugQuestion] = useState('');
   const [copiedTextId, setCopiedTextId] = useState<string | null>(null);
+  const [expandedSourceMessageIds, setExpandedSourceMessageIds] = useState<string[]>([]);
 
   const documentQuery = useQuery({
     queryKey: ['document', documentId],
@@ -191,6 +193,16 @@ export const DocumentChatPage = () => {
   const clearRetrievalTest = () => {
     setDebugQuestion('');
     searchMutation.reset();
+  };
+
+  const toggleMessageSources = (messageId: string) => {
+    setExpandedSourceMessageIds((currentIds) => {
+      if (currentIds.includes(messageId)) {
+        return currentIds.filter((id) => id !== messageId);
+      }
+
+      return [...currentIds, messageId];
+    });
   };
 
   const handleDeleteChat = (chatId: string) => {
@@ -463,49 +475,68 @@ export const DocumentChatPage = () => {
 
                       {chatMessage.role === 'assistant' &&
                         chatMessage.sources.length > 0 && (
-                          <div className="mt-4 space-y-2 border-t pt-4">
-                            <div className="text-xs font-medium text-muted-foreground">
-                              Sources
-                            </div>
+                          <div className="mt-4 border-t pt-3">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 gap-1 rounded-md px-2 text-xs font-medium text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                              onClick={() => toggleMessageSources(chatMessage._id)}
+                            >
+                              <ChevronDown
+                                className={`h-4 w-4 transition-transform ${
+                                  expandedSourceMessageIds.includes(chatMessage._id)
+                                    ? 'rotate-180'
+                                    : ''
+                                }`}
+                              />
+                              {expandedSourceMessageIds.includes(chatMessage._id)
+                                ? 'Hide sources'
+                                : `Show sources (${chatMessage.sources.length})`}
+                            </Button>
 
-                            {chatMessage.sources.map((source, index) => {
-                              const copyId = `${chatMessage._id}-source-${source.chunkIndex}-${index}`;
+                            {expandedSourceMessageIds.includes(chatMessage._id) && (
+                              <div className="mt-3 space-y-3 rounded-md border border-dashed bg-muted/25 p-3">
+                                {chatMessage.sources.map((source, index) => {
+                                  const copyId = `${chatMessage._id}-source-${source.chunkIndex}-${index}`;
 
-                              return (
-                                <div
-                                  key={`${chatMessage._id}-${source.chunkIndex}-${source.score}`}
-                                  className="rounded-md border bg-muted/50 p-3"
-                                >
-                                  <div className="mb-1 flex items-center justify-between gap-2 text-xs text-muted-foreground">
-                                    <span>
-                                      Source {index + 1} - Chunk {source.chunkIndex} -
-                                      {' '}
-                                      {formatSourceScore(source.score, source.relevanceScore, source.rerankScore, source.keywordScore, source.finalScore)}
-                                      {' - '}
-                                      {getSourceScoreLabel(source.relevanceScore)}
-                                    </span>
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() =>
-                                        handleCopyText(copyId, source.chunkText)
-                                      }
+                                  return (
+                                    <div
+                                      key={`${chatMessage._id}-${source.chunkIndex}-${source.score}`}
+                                      className="rounded-md border bg-background/70 p-4"
                                     >
-                                      {copiedTextId === copyId ? (
-                                        <Check className="h-4 w-4" />
-                                      ) : (
-                                        <Copy className="h-4 w-4" />
-                                      )}
-                                      {copiedTextId === copyId ? 'Copied' : 'Copy'}
-                                    </Button>
-                                  </div>
-                                  <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
-                                    {source.chunkText}
-                                  </p>
-                                </div>
-                              );
-                            })}
+                                      <div className="mb-1 flex items-center justify-between gap-2 text-xs text-muted-foreground">
+                                        <span>
+                                          Source {index + 1} - Chunk {source.chunkIndex} -
+                                          {' '}
+                                          {formatSourceScore(source.score, source.relevanceScore, source.rerankScore, source.keywordScore, source.finalScore)}
+                                          {' - '}
+                                          {getSourceScoreLabel(source.relevanceScore)}
+                                        </span>
+                                        <Button
+                                          type="button"
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() =>
+                                            handleCopyText(copyId, source.chunkText)
+                                          }
+                                        >
+                                          {copiedTextId === copyId ? (
+                                            <Check className="h-4 w-4" />
+                                          ) : (
+                                            <Copy className="h-4 w-4" />
+                                          )}
+                                          {copiedTextId === copyId ? 'Copied' : 'Copy'}
+                                        </Button>
+                                      </div>
+                                      <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
+                                        {source.chunkText}
+                                      </p>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
                           </div>
                         )}
                     </div>
