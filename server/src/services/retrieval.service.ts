@@ -34,6 +34,59 @@ const normalizeForDedupe = (text: string): string => {
   return text.toLowerCase().replace(/\s+/g, ' ').trim();
 };
 
+const STOP_WORDS = new Set([
+  'a', 'an', 'and', 'are', 'as', 'at', 'be', 'but', 'by',
+  'for', 'from', 'has', 'have', 'he', 'her', 'his', 'i',
+  'in', 'is', 'it', 'its', 'of', 'on', 'or', 'she', 'that',
+  'the', 'their', 'this', 'to', 'was', 'what', 'when', 'where',
+  'who', 'why', 'with', 'you', 'your',
+]);
+
+const tokenize = (text: string): string[] => {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .split(/\s+/)
+    .filter((word) => word.length > 2 && !STOP_WORDS.has(word));
+};
+
+const getKeywordScore = (question: string, chunkText: string): number => {
+  const questionWords = Array.from(new Set(tokenize(question)));
+  const chunkWords = new Set(tokenize(chunkText));
+
+  if (questionWords.length === 0) {
+    return 0;
+  }
+
+  const matchedWords = questionWords.filter((word) => chunkWords.has(word));
+
+  return matchedWords.length / questionWords.length;
+};
+
+const addHybridScores = (
+  question: string,
+  sources: SearchResult[]
+): SearchResult[] => {
+  const topVectorScore = sources[0]?.score || 0;
+
+  return sources
+    .map((source) => {
+      const vectorScore = topVectorScore > 0 ? source.score / topVectorScore : 0;
+      const keywordScore = getKeywordScore(question, source.chunkText);
+
+      const finalScore = Number(
+        (vectorScore * 0.75 + keywordScore * 0.25).toFixed(3)
+      );
+
+      return {
+        ...source,
+        keywordScore: Number(keywordScore.toFixed(3)),
+        finalScore,
+      };
+    })
+    .sort((a, b) => (b.finalScore || 0) - (a.finalScore || 0));
+};
+
 const isUsefulSource = (source: SearchResult): boolean => {
   const text = source.chunkText.trim();
   const letterCount = text.match(/[A-Za-z]/g)?.length || 0;
@@ -67,11 +120,13 @@ const selectBestSources = (
     return sources;
   }
 
-  const topScore = sources[0]?.score || 0;
+  const topScore = sources[0]?.finalScore || sources[0]?.score || 0;
   const minimumScore = topScore * relativeScoreCutoff;
 
   const strongSources = sources.filter((source) => {
-    return source.score >= minimumScore;
+    const sourceScore = source.finalScore || source.score;
+
+    return sourceScore >= minimumScore;
   });
 
   const selectedSources =
@@ -83,9 +138,11 @@ const selectBestSources = (
 };
 
 const addRelativeRelevanceScores = (sources: SearchResult[]): SearchResult[] => {
-  const topScore = sources[0]?.score || 0;
+  const topScore = sources[0]?.finalScore || sources[0]?.score || 0;
 
   return sources.map((source) => {
+    const sourceScore = source.finalScore || source.score;
+
     if (topScore <= 0) {
       return {
         ...source,
@@ -95,7 +152,7 @@ const addRelativeRelevanceScores = (sources: SearchResult[]): SearchResult[] => 
 
     return {
       ...source,
-      relevanceScore: Number((source.score / topScore).toFixed(3)),
+      relevanceScore: Number((sourceScore / topScore).toFixed(3)),
     };
   });
 };
@@ -151,8 +208,9 @@ export const retrieveDocumentSources = async ({
   const dedupedSources = removeDuplicateSources(
     usefulSources.length > 0 ? usefulSources : candidates
   );
+  const hybridScoredSources = addHybridScores(question, dedupedSources);
   const selectedSources = selectBestSources(
-    dedupedSources,
+    hybridScoredSources,
     finalSourceLimit,
     config.minSourceCount,
     config.relativeScoreCutoff
@@ -160,7 +218,7 @@ export const retrieveDocumentSources = async ({
   const rerankedSources = config.rerankingEnabled
     ? await rerankSources(
         question,
-        dedupedSources.slice(0, finalCandidateLimit),
+        hybridScoredSources.slice(0, finalCandidateLimit),
         config.rerankingSourceLimit
       )
     : selectedSources;

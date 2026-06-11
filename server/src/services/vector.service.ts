@@ -52,7 +52,9 @@ interface SaveVectorInput {
 export interface SearchResult {
   chunkText: string;
   chunkIndex: number;
-  score: number;
+  score: number; // raw vector score from qdrant
+  keywordScore?: number;
+  finalScore?: number;
   relevanceScore?: number;
   rerankScore?: number;
 }
