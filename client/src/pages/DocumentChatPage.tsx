@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import ReactMarkdown from 'react-markdown';
@@ -55,12 +55,14 @@ interface MessageContentProps {
   text: string;
   enabled: boolean;
   markdown?: boolean;
+  onComplete?: () => void;
 }
 
 const MessageContent = ({
   text,
   enabled,
   markdown = false,
+  onComplete,
 }: MessageContentProps) => {
   const [visibleLength, setVisibleLength] = useState(enabled ? 0 : text.length);
   const visibleText = enabled ? text.slice(0, visibleLength) : text;
@@ -76,6 +78,7 @@ const MessageContent = ({
       setVisibleLength((currentLength) => {
         if (currentLength >= text.length) {
           window.clearInterval(intervalId);
+          onComplete?.();
           return currentLength;
         }
 
@@ -86,7 +89,7 @@ const MessageContent = ({
     return () => {
       window.clearInterval(intervalId);
     };
-  }, [enabled, text.length]);
+  }, [enabled, text.length, onComplete]);
 
   if (markdown) {
     return (
@@ -131,6 +134,7 @@ export const DocumentChatPage = () => {
   const [debugQuestion, setDebugQuestion] = useState('');
   const [copiedTextId, setCopiedTextId] = useState<string | null>(null);
   const [expandedSourceMessageIds, setExpandedSourceMessageIds] = useState<string[]>([]);
+  const [typingMessageId, setTypingMessageId] = useState<string | null>(null);
 
   const documentQuery = useQuery({
     queryKey: ['document', documentId],
@@ -212,6 +216,7 @@ export const DocumentChatPage = () => {
     },
     onSuccess: (data) => {
       setSelectedChatId(data.chatId);
+      setTypingMessageId(data.response.assistantMessage._id);
       setMessage('');
       queryClient.invalidateQueries({ queryKey: ['chats', documentId] });
       queryClient.invalidateQueries({ queryKey: ['messages', data.chatId] });
@@ -251,9 +256,6 @@ export const DocumentChatPage = () => {
   const inputIsDisabled =
     !documentIsReady || askQuestionMutation.isPending;
   const messageIsTooLong = message.length > MAX_MESSAGE_LENGTH;
-  const latestAssistantMessageId = [...messages]
-    .reverse()
-    .find((chatMessage) => chatMessage.role === 'assistant')?._id;
 
   const handleCopyText = async (copyId: string, text: string) => {
     await copyToClipboard(text);
@@ -278,6 +280,16 @@ export const DocumentChatPage = () => {
       return [...currentIds, messageId];
     });
   };
+
+  const handleTypingComplete = useCallback((messageId: string) => {
+    setTypingMessageId((currentMessageId) => {
+      if (currentMessageId !== messageId) {
+        return currentMessageId;
+      }
+
+      return null;
+    });
+  }, []);
 
   const handleDeleteChat = (chatId: string) => {
     const confirmed = window.confirm('Delete this chat? This cannot be undone.');
@@ -520,7 +532,7 @@ export const DocumentChatPage = () => {
                 {messages.map((chatMessage) => {
                   const shouldTypeResponse =
                     chatMessage.role === 'assistant' &&
-                    chatMessage._id === latestAssistantMessageId;
+                    chatMessage._id === typingMessageId;
 
                   return (
                     <div
@@ -552,6 +564,7 @@ export const DocumentChatPage = () => {
                           text={chatMessage.content}
                           enabled={shouldTypeResponse}
                           markdown={chatMessage.role === 'assistant'}
+                          onComplete={() => handleTypingComplete(chatMessage._id)}
                         />
 
                       {chatMessage.role === 'assistant' &&
