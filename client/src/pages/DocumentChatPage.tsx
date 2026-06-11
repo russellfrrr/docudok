@@ -133,6 +133,7 @@ export const DocumentChatPage = () => {
   const [copiedTextId, setCopiedTextId] = useState<string | null>(null);
   const [expandedSourceMessageIds, setExpandedSourceMessageIds] = useState<string[]>([]);
   const [typingMessageId, setTypingMessageId] = useState<string | null>(null);
+  const [pendingUserMessage, setPendingUserMessage] = useState('');
 
   const documentQuery = useQuery({
     queryKey: ['document', documentId],
@@ -177,16 +178,15 @@ export const DocumentChatPage = () => {
   });
 
   const askQuestionMutation = useMutation({
-    mutationFn: async () => {
-      if (!message.trim()) {
+    mutationFn: async (content: string) => {
+      if (!content) {
         throw new Error('Message is required');
       }
 
-      if (message.length > MAX_MESSAGE_LENGTH) {
+      if (content.length > MAX_MESSAGE_LENGTH) {
         throw new Error(`Message must be ${MAX_MESSAGE_LENGTH} characters or fewer`);
       }
 
-      const content = message.trim();
       let chatId = activeChatId;
 
       if (!chatId) {
@@ -212,12 +212,20 @@ export const DocumentChatPage = () => {
 
       return { chatId, response };
     },
+    onMutate: (content) => {
+      setPendingUserMessage(content);
+      setMessage('');
+    },
     onSuccess: (data) => {
       setSelectedChatId(data.chatId);
       setTypingMessageId(data.response.assistantMessage._id);
-      setMessage('');
+      setPendingUserMessage('');
       queryClient.invalidateQueries({ queryKey: ['chats', documentId] });
       queryClient.invalidateQueries({ queryKey: ['messages', data.chatId] });
+    },
+    onError: (_error, content) => {
+      setPendingUserMessage('');
+      setMessage(content);
     },
   });
 
@@ -237,7 +245,11 @@ export const DocumentChatPage = () => {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messagesQuery.data?.messages.length, askQuestionMutation.isPending]);
+  }, [
+    messagesQuery.data?.messages.length,
+    askQuestionMutation.isPending,
+    pendingUserMessage,
+  ]);
 
   const handleTypingComplete = useCallback((messageId: string) => {
     setTypingMessageId((currentMessageId) => {
@@ -260,7 +272,10 @@ export const DocumentChatPage = () => {
   const hasSelectedChat = Boolean(activeChatId);
   const hasMessages = messages.length > 0;
   const showEmptyChat =
-    hasSelectedChat && !hasMessages && !messagesQuery.isLoading;
+    hasSelectedChat &&
+    !hasMessages &&
+    !messagesQuery.isLoading &&
+    !pendingUserMessage;
   const inputIsDisabled =
     !documentIsReady || askQuestionMutation.isPending;
   const messageIsTooLong = message.length > MAX_MESSAGE_LENGTH;
@@ -484,7 +499,7 @@ export const DocumentChatPage = () => {
                   </Alert>
                 )}
 
-                {!activeChatId && (
+                {!activeChatId && !pendingUserMessage && (
                   <div className="flex min-h-[360px] flex-col items-center justify-center rounded-md border bg-background p-6 text-center">
                     <MessageSquare className="mb-3 h-8 w-8 text-muted-foreground" />
                     <h2 className="text-base font-medium text-foreground">
@@ -636,6 +651,20 @@ export const DocumentChatPage = () => {
                   );
                 })}
 
+                {pendingUserMessage && (
+                  <div className="flex justify-end">
+                    <div className="max-w-[88%] rounded-lg border bg-primary p-4 text-primary-foreground">
+                      <div className="mb-2 text-xs font-medium uppercase text-primary-foreground/70">
+                        user
+                      </div>
+                      <MessageContent
+                        text={pendingUserMessage}
+                        enabled={false}
+                      />
+                    </div>
+                  </div>
+                )}
+
                 {askQuestionMutation.isPending && <ThinkingMessage />}
 
                 {askQuestionMutation.isError && (
@@ -666,7 +695,7 @@ export const DocumentChatPage = () => {
                   className="flex flex-col gap-3 rounded-lg border bg-card p-2 sm:flex-row"
                   onSubmit={(event) => {
                     event.preventDefault();
-                    askQuestionMutation.mutate();
+                    askQuestionMutation.mutate(message.trim());
                   }}
                 >
                   <Input
