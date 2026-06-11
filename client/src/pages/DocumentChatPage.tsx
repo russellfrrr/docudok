@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import ReactMarkdown from 'react-markdown';
 import {
   AlertCircle,
   ArrowLeft,
@@ -50,15 +51,23 @@ const SUGGESTED_QUESTIONS = [
 const MAX_MESSAGE_LENGTH = 2000;
 const TYPEWRITER_SPEED_MS = 12;
 
-interface TypewriterTextProps {
+interface MessageContentProps {
   text: string;
   enabled: boolean;
+  markdown?: boolean;
 }
 
-const TypewriterText = ({ text, enabled }: TypewriterTextProps) => {
+const MessageContent = ({
+  text,
+  enabled,
+  markdown = false,
+}: MessageContentProps) => {
   const [visibleLength, setVisibleLength] = useState(enabled ? 0 : text.length);
+  const visibleText = enabled ? text.slice(0, visibleLength) : text;
 
   useEffect(() => {
+    setVisibleLength(enabled ? 0 : text.length);
+
     if (!enabled) {
       return;
     }
@@ -79,9 +88,17 @@ const TypewriterText = ({ text, enabled }: TypewriterTextProps) => {
     };
   }, [enabled, text.length]);
 
+  if (markdown) {
+    return (
+      <div className="space-y-3 text-sm leading-6 [&_ol]:ml-5 [&_ol]:list-decimal [&_p]:leading-6 [&_strong]:font-semibold [&_ul]:ml-5 [&_ul]:list-disc">
+        <ReactMarkdown>{visibleText}</ReactMarkdown>
+      </div>
+    );
+  }
+
   return (
     <p className="whitespace-pre-wrap text-sm leading-6">
-      {enabled ? text.slice(0, visibleLength) : text}
+      {visibleText}
     </p>
   );
 };
@@ -531,9 +548,10 @@ export const DocumentChatPage = () => {
                           {chatMessage.role}
                         </div>
 
-                        <TypewriterText
+                        <MessageContent
                           text={chatMessage.content}
                           enabled={shouldTypeResponse}
+                          markdown={chatMessage.role === 'assistant'}
                         />
 
                       {chatMessage.role === 'assistant' &&
