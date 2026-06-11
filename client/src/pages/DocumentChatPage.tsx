@@ -48,6 +48,60 @@ const SUGGESTED_QUESTIONS = [
   'What should I review carefully?',
 ];
 const MAX_MESSAGE_LENGTH = 2000;
+const TYPEWRITER_SPEED_MS = 12;
+
+interface TypewriterTextProps {
+  text: string;
+  enabled: boolean;
+}
+
+const TypewriterText = ({ text, enabled }: TypewriterTextProps) => {
+  const [visibleLength, setVisibleLength] = useState(enabled ? 0 : text.length);
+
+  useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      setVisibleLength((currentLength) => {
+        if (currentLength >= text.length) {
+          window.clearInterval(intervalId);
+          return currentLength;
+        }
+
+        return currentLength + 1;
+      });
+    }, TYPEWRITER_SPEED_MS);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [enabled, text.length]);
+
+  return (
+    <p className="whitespace-pre-wrap text-sm leading-6">
+      {enabled ? text.slice(0, visibleLength) : text}
+    </p>
+  );
+};
+
+const ThinkingMessage = () => {
+  return (
+    <div className="flex justify-start">
+      <div className="max-w-[88%] rounded-lg border bg-background p-4 text-foreground">
+        <div className="mb-2 text-xs font-medium uppercase text-muted-foreground">
+          assistant
+        </div>
+        <div className="flex h-6 items-center gap-1">
+          <span className="size-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.2s]" />
+          <span className="size-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.1s]" />
+          <span className="size-1.5 animate-bounce rounded-full bg-muted-foreground" />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export const DocumentChatPage = () => {
   const { documentId } = useParams();
@@ -180,6 +234,9 @@ export const DocumentChatPage = () => {
   const inputIsDisabled =
     !documentIsReady || askQuestionMutation.isPending;
   const messageIsTooLong = message.length > MAX_MESSAGE_LENGTH;
+  const latestAssistantMessageId = [...messages]
+    .reverse()
+    .find((chatMessage) => chatMessage.role === 'assistant')?._id;
 
   const handleCopyText = async (copyId: string, text: string) => {
     await copyToClipboard(text);
@@ -443,35 +500,41 @@ export const DocumentChatPage = () => {
                   </div>
                 )}
 
-                {messages.map((chatMessage) => (
-                  <div
-                    key={chatMessage._id}
-                    className={`flex ${
-                      chatMessage.role === 'user'
-                        ? 'justify-end'
-                        : 'justify-start'
-                    }`}
-                  >
+                {messages.map((chatMessage) => {
+                  const shouldTypeResponse =
+                    chatMessage.role === 'assistant' &&
+                    chatMessage._id === latestAssistantMessageId;
+
+                  return (
                     <div
-                      className={`max-w-[88%] rounded-lg border p-4 ${
+                      key={chatMessage._id}
+                      className={`flex ${
                         chatMessage.role === 'user'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-background text-foreground'
+                          ? 'justify-end'
+                          : 'justify-start'
                       }`}
                     >
                       <div
-                        className={`mb-2 text-xs font-medium uppercase ${
+                        className={`max-w-[88%] rounded-lg border p-4 ${
                           chatMessage.role === 'user'
-                            ? 'text-primary-foreground/70'
-                            : 'text-muted-foreground'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-background text-foreground'
                         }`}
                       >
-                        {chatMessage.role}
-                      </div>
+                        <div
+                          className={`mb-2 text-xs font-medium uppercase ${
+                            chatMessage.role === 'user'
+                              ? 'text-primary-foreground/70'
+                              : 'text-muted-foreground'
+                          }`}
+                        >
+                          {chatMessage.role}
+                        </div>
 
-                      <p className="whitespace-pre-wrap text-sm leading-6">
-                        {chatMessage.content}
-                      </p>
+                        <TypewriterText
+                          text={chatMessage.content}
+                          enabled={shouldTypeResponse}
+                        />
 
                       {chatMessage.role === 'assistant' &&
                         chatMessage.sources.length > 0 && (
@@ -539,9 +602,12 @@ export const DocumentChatPage = () => {
                             )}
                           </div>
                         )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
+
+                {askQuestionMutation.isPending && <ThinkingMessage />}
 
                 {askQuestionMutation.isError && (
                   <Alert variant="destructive">
