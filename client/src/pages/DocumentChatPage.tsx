@@ -32,8 +32,8 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ChatMessageBubble } from '@/components/chat/ChatMessageBubble';
 import { MessageContent } from '@/components/chat/MessageContent';
-import { MessageSources } from '@/components/chat/MessageSources';
 import { ThinkingMessage } from '@/components/chat/ThinkingMessage';
 import { copyToClipboard } from '@/lib/clipboard';
 import {
@@ -478,53 +478,18 @@ export const DocumentChatPage = () => {
                     chatMessage._id === typingMessageId;
 
                   return (
-                    <div
+                    <ChatMessageBubble
                       key={chatMessage._id}
-                      className={`flex ${
-                        chatMessage.role === 'user'
-                          ? 'justify-end'
-                          : 'justify-start'
-                      }`}
-                    >
-                      <div
-                        className={`max-w-[88%] rounded-lg border p-4 ${
-                          chatMessage.role === 'user'
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-background text-foreground'
-                        }`}
-                      >
-                        <div
-                          className={`mb-2 text-xs font-medium uppercase ${
-                            chatMessage.role === 'user'
-                              ? 'text-primary-foreground/70'
-                              : 'text-muted-foreground'
-                          }`}
-                        >
-                          {chatMessage.role}
-                        </div>
-
-                        <MessageContent
-                          text={chatMessage.content}
-                          enabled={shouldTypeResponse}
-                          markdown={chatMessage.role === 'assistant'}
-                          onComplete={() => handleTypingComplete(chatMessage._id)}
-                        />
-
-                      {chatMessage.role === 'assistant' &&
-                        chatMessage.sources.length > 0 && (
-                          <MessageSources
-                            messageId={chatMessage._id}
-                            sources={chatMessage.sources}
-                            expanded={expandedSourceMessageIds.includes(
-                              chatMessage._id
-                            )}
-                            copiedTextId={copiedTextId}
-                            onToggle={toggleMessageSources}
-                            onCopyText={handleCopyText}
-                          />
-                        )}
-                      </div>
-                    </div>
+                      message={chatMessage}
+                      shouldTypeResponse={shouldTypeResponse}
+                      sourcesExpanded={expandedSourceMessageIds.includes(
+                        chatMessage._id
+                      )}
+                      copiedTextId={copiedTextId}
+                      onTypingComplete={handleTypingComplete}
+                      onToggleSources={toggleMessageSources}
+                      onCopyText={handleCopyText}
+                    />
                   );
                 })}
 
