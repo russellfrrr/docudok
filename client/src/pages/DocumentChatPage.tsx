@@ -5,7 +5,6 @@ import {
   AlertCircle,
   ArrowLeft,
   Check,
-  ChevronDown,
   Copy,
   FileText,
   Loader2,
@@ -34,6 +33,7 @@ import {
 } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { MessageContent } from '@/components/chat/MessageContent';
+import { MessageSources } from '@/components/chat/MessageSources';
 import { ThinkingMessage } from '@/components/chat/ThinkingMessage';
 import { copyToClipboard } from '@/lib/clipboard';
 import {
@@ -512,69 +512,16 @@ export const DocumentChatPage = () => {
 
                       {chatMessage.role === 'assistant' &&
                         chatMessage.sources.length > 0 && (
-                          <div className="mt-4 border-t pt-3">
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 gap-1 rounded-md px-2 text-xs font-medium text-muted-foreground hover:bg-muted/60 hover:text-foreground"
-                              onClick={() => toggleMessageSources(chatMessage._id)}
-                            >
-                              <ChevronDown
-                                className={`h-4 w-4 transition-transform ${
-                                  expandedSourceMessageIds.includes(chatMessage._id)
-                                    ? 'rotate-180'
-                                    : ''
-                                }`}
-                              />
-                              {expandedSourceMessageIds.includes(chatMessage._id)
-                                ? 'Hide sources'
-                                : `Show sources (${chatMessage.sources.length})`}
-                            </Button>
-
-                            {expandedSourceMessageIds.includes(chatMessage._id) && (
-                              <div className="mt-3 space-y-3 rounded-md border border-dashed bg-muted/25 p-3">
-                                {chatMessage.sources.map((source, index) => {
-                                  const copyId = `${chatMessage._id}-source-${source.chunkIndex}-${index}`;
-
-                                  return (
-                                    <div
-                                      key={`${chatMessage._id}-${source.chunkIndex}-${source.score}`}
-                                      className="rounded-md border bg-background/70 p-4"
-                                    >
-                                      <div className="mb-1 flex items-center justify-between gap-2 text-xs text-muted-foreground">
-                                        <span>
-                                          Source {index + 1} - Chunk {source.chunkIndex} -
-                                          {' '}
-                                          {formatSourceScore(source.score, source.relevanceScore, source.rerankScore, source.keywordScore, source.finalScore)}
-                                          {' - '}
-                                          {getSourceScoreLabel(source.relevanceScore)}
-                                        </span>
-                                        <Button
-                                          type="button"
-                                          variant="ghost"
-                                          size="sm"
-                                          onClick={() =>
-                                            handleCopyText(copyId, source.chunkText)
-                                          }
-                                        >
-                                          {copiedTextId === copyId ? (
-                                            <Check className="h-4 w-4" />
-                                          ) : (
-                                            <Copy className="h-4 w-4" />
-                                          )}
-                                          {copiedTextId === copyId ? 'Copied' : 'Copy'}
-                                        </Button>
-                                      </div>
-                                      <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
-                                        {source.chunkText}
-                                      </p>
-                                    </div>
-                                  );
-                                })}
-                              </div>
+                          <MessageSources
+                            messageId={chatMessage._id}
+                            sources={chatMessage.sources}
+                            expanded={expandedSourceMessageIds.includes(
+                              chatMessage._id
                             )}
-                          </div>
+                            copiedTextId={copiedTextId}
+                            onToggle={toggleMessageSources}
+                            onCopyText={handleCopyText}
+                          />
                         )}
                       </div>
                     </div>
