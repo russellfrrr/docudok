@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import ReactMarkdown from 'react-markdown';
 import {
   AlertCircle,
   ArrowLeft,
@@ -34,6 +33,8 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { MessageContent } from '@/components/chat/MessageContent';
+import { ThinkingMessage } from '@/components/chat/ThinkingMessage';
 import { copyToClipboard } from '@/lib/clipboard';
 import {
   getDocumentFailureMessage,
@@ -49,77 +50,6 @@ const SUGGESTED_QUESTIONS = [
   'What should I review carefully?',
 ];
 const MAX_MESSAGE_LENGTH = 2000;
-const TYPEWRITER_SPEED_MS = 12;
-
-interface MessageContentProps {
-  text: string;
-  enabled: boolean;
-  markdown?: boolean;
-  onComplete?: () => void;
-}
-
-const MessageContent = ({
-  text,
-  enabled,
-  markdown = false,
-  onComplete,
-}: MessageContentProps) => {
-  const [visibleLength, setVisibleLength] = useState(enabled ? 0 : text.length);
-  const visibleText = enabled ? text.slice(0, visibleLength) : text;
-
-  useEffect(() => {
-    if (!enabled) {
-      return;
-    }
-
-    const intervalId = window.setInterval(() => {
-      setVisibleLength((currentLength) => {
-        if (currentLength >= text.length) {
-          window.clearInterval(intervalId);
-          onComplete?.();
-          return currentLength;
-        }
-
-        return currentLength + 1;
-      });
-    }, TYPEWRITER_SPEED_MS);
-
-    return () => {
-      window.clearInterval(intervalId);
-    };
-  }, [enabled, text.length, onComplete]);
-
-  if (markdown) {
-    return (
-      <div className="space-y-3 text-sm leading-6 [&_ol]:ml-5 [&_ol]:list-decimal [&_p]:leading-6 [&_strong]:font-semibold [&_ul]:ml-5 [&_ul]:list-disc">
-        <ReactMarkdown>{visibleText}</ReactMarkdown>
-      </div>
-    );
-  }
-
-  return (
-    <p className="whitespace-pre-wrap text-sm leading-6">
-      {visibleText}
-    </p>
-  );
-};
-
-const ThinkingMessage = () => {
-  return (
-    <div className="flex justify-start">
-      <div className="max-w-[88%] rounded-lg border bg-background p-4 text-foreground">
-        <div className="mb-2 text-xs font-medium uppercase text-muted-foreground">
-          assistant
-        </div>
-        <div className="flex h-6 items-center gap-1">
-          <span className="size-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.2s]" />
-          <span className="size-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.1s]" />
-          <span className="size-1.5 animate-bounce rounded-full bg-muted-foreground" />
-        </div>
-      </div>
-    </div>
-  );
-};
 
 export const DocumentChatPage = () => {
   const { documentId } = useParams();
