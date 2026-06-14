@@ -20,6 +20,8 @@ export const MessageSources = ({
   onToggle,
   onCopyText,
 }: MessageSourcesProps) => {
+  const sourcesId = `${messageId}-sources`;
+
   return (
     <div className="mt-4 border-t pt-3">
       <Button
@@ -28,6 +30,8 @@ export const MessageSources = ({
         size="sm"
         className="h-8 gap-1 rounded-md px-2 text-xs font-medium text-muted-foreground hover:bg-muted/60 hover:text-foreground"
         onClick={() => onToggle(messageId)}
+        aria-expanded={expanded}
+        aria-controls={sourcesId}
       >
         <ChevronDown
           className={`h-4 w-4 transition-transform ${
@@ -38,7 +42,10 @@ export const MessageSources = ({
       </Button>
 
       {expanded && (
-        <div className="mt-3 space-y-3 rounded-md border border-dashed bg-muted/25 p-3">
+        <div
+          id={sourcesId}
+          className="mt-3 space-y-3 rounded-md border border-dashed bg-muted/25 p-3"
+        >
           {sources.map((source, index) => {
             const copyId = `${messageId}-source-${source.chunkIndex}-${index}`;
 
