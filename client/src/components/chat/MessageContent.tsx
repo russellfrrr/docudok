@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 
 const TYPEWRITER_SPEED_MS = 12;
@@ -16,8 +16,13 @@ export const MessageContent = ({
   markdown = false,
   onComplete,
 }: MessageContentProps) => {
+  const onCompleteRef = useRef(onComplete);
   const [visibleLength, setVisibleLength] = useState(enabled ? 0 : text.length);
   const visibleText = enabled ? text.slice(0, visibleLength) : text;
+
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
 
   useEffect(() => {
     if (!enabled) {
@@ -28,7 +33,7 @@ export const MessageContent = ({
       setVisibleLength((currentLength) => {
         if (currentLength >= text.length) {
           window.clearInterval(intervalId);
-          onComplete?.();
+          onCompleteRef.current?.();
           return currentLength;
         }
 
@@ -39,7 +44,7 @@ export const MessageContent = ({
     return () => {
       window.clearInterval(intervalId);
     };
-  }, [enabled, text.length, onComplete]);
+  }, [enabled, text.length]);
 
   if (markdown) {
     return (
