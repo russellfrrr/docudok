@@ -16,14 +16,24 @@ interface RetrievalDebugConfig {
   candidateLimit: number;
   minSourceCount: number;
   relativeScoreCutoff: number;
+  vectorScoreWeight: number;
+  keywordScoreWeight: number;
 }
 
 const getRetrievalConfig = () => {
+  const vectorScoreWeight = getNumberEnv('RETRIEVAL_VECTOR_WEIGHT', 0.75);
+  const keywordScoreWeight = getNumberEnv('RETRIEVAL_KEYWORD_WEIGHT', 0.25);
+  const totalHybridWeight = vectorScoreWeight + keywordScoreWeight;
+
   return {
     minSourceCount: getNumberEnv('RETRIEVAL_MIN_SOURCES', 3),
     sourceLimit: getNumberEnv('RETRIEVAL_SOURCE_LIMIT', 5),
     candidateLimit: getNumberEnv('RETRIEVAL_CANDIDATE_LIMIT', 12),
     relativeScoreCutoff: getNumberEnv('RETRIEVAL_SCORE_CUTOFF', 0.7),
+    vectorScoreWeight:
+      totalHybridWeight > 0 ? vectorScoreWeight / totalHybridWeight : 0.75,
+    keywordScoreWeight:
+      totalHybridWeight > 0 ? keywordScoreWeight / totalHybridWeight : 0.25,
     rerankingEnabled: process.env.RERANKING_ENABLED === 'true',
     rerankingCandidateLimit: getNumberEnv('RERANKING_CANDIDATE_LIMIT', 15),
     rerankingSourceLimit: getNumberEnv('RERANKING_SOURCE_LIMIT', 5),
@@ -65,7 +75,9 @@ const getKeywordScore = (question: string, chunkText: string): number => {
 
 const addHybridScores = (
   question: string,
-  sources: SearchResult[]
+  sources: SearchResult[],
+  vectorScoreWeight: number,
+  keywordScoreWeight: number
 ): SearchResult[] => {
   const topVectorScore = sources[0]?.score || 0;
 
@@ -75,7 +87,10 @@ const addHybridScores = (
       const keywordScore = getKeywordScore(question, source.chunkText);
 
       const finalScore = Number(
-        (vectorScore * 0.75 + keywordScore * 0.25).toFixed(3)
+        (
+          vectorScore * vectorScoreWeight +
+          keywordScore * keywordScoreWeight
+        ).toFixed(3)
       );
 
       return {
@@ -208,7 +223,12 @@ export const retrieveDocumentSources = async ({
   const dedupedSources = removeDuplicateSources(
     usefulSources.length > 0 ? usefulSources : candidates
   );
-  const hybridScoredSources = addHybridScores(question, dedupedSources);
+  const hybridScoredSources = addHybridScores(
+    question,
+    dedupedSources,
+    config.vectorScoreWeight,
+    config.keywordScoreWeight
+  );
   const selectedSources = selectBestSources(
     hybridScoredSources,
     finalSourceLimit,
@@ -232,6 +252,8 @@ export const retrieveDocumentSources = async ({
     candidateLimit: finalCandidateLimit,
     minSourceCount: config.minSourceCount,
     relativeScoreCutoff: config.relativeScoreCutoff,
+    vectorScoreWeight: config.vectorScoreWeight,
+    keywordScoreWeight: config.keywordScoreWeight,
   });
 
   return scoredSources;
