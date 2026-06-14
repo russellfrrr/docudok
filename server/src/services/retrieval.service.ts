@@ -187,11 +187,17 @@ const logRetrievalDebug = (
     config,
     candidateScores: candidates.map((source) => ({
       chunkIndex: source.chunkIndex,
-      score: Number(source.score.toFixed(3)),
+      vectorScore: Number(source.score.toFixed(3)),
+      keywordScore: source.keywordScore,
+      finalScore: source.finalScore,
     })),
     selectedScores: sources.map((source) => ({
       chunkIndex: source.chunkIndex,
-      score: Number(source.score.toFixed(3)),
+      vectorScore: Number(source.score.toFixed(3)),
+      keywordScore: source.keywordScore,
+      finalScore: source.finalScore,
+      relevanceScore: source.relevanceScore,
+      rerankScore: source.rerankScore,
     })),
   });
 };
@@ -247,7 +253,7 @@ export const retrieveDocumentSources = async ({
     rerankedSources.slice(0, finalSourceLimit)
   );
 
-  logRetrievalDebug(question, candidates, scoredSources, {
+  logRetrievalDebug(question, hybridScoredSources, scoredSources, {
     sourceLimit: finalSourceLimit,
     candidateLimit: finalCandidateLimit,
     minSourceCount: config.minSourceCount,
