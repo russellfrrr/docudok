@@ -5,9 +5,10 @@ import MessageModel from '../models/Message';
 import DocumentModel from '../models/Document';
 import { generateAnswer } from '../services/ai.service';
 import { retrieveDocumentSources } from '../services/retrieval.service';
-import { getNumberEnv } from '../utils/env';
-
-const CHAT_MESSAGE_MAX_LENGTH = getNumberEnv('CHAT_MESSAGE_MAX_LENGTH', 2000);
+import {
+  normalizeChatMessageContent,
+  validateChatMessageContent,
+} from '../utils/chat-validation';
 
 export const createChat = async (req: AuthRequest, res: Response) => {
   try {
@@ -93,16 +94,11 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
       return res.status(401).json({ message: 'Not authorized' });
     }
 
-    const content = String(req.body.content || '').trim();
+    const content = normalizeChatMessageContent(req.body.content);
+    const contentError = validateChatMessageContent(content);
 
-    if (!content) {
-      return res.status(400).json({ message: 'Message content is required' });
-    }
-
-    if (content.length > CHAT_MESSAGE_MAX_LENGTH) {
-      return res.status(400).json({
-        message: `Message must be ${CHAT_MESSAGE_MAX_LENGTH} characters or fewer`,
-      });
+    if (contentError) {
+      return res.status(400).json({ message: contentError });
     }
 
     const chat = await ChatModel.findOne({
