@@ -5,13 +5,10 @@ import {
   LogOut,
   Loader2,
   RefreshCcw,
-  Trash2,
   Upload,
   X,
-  RotateCcw,
 } from 'lucide-react';
 import { useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import {
   uploadDocument,
@@ -25,12 +22,8 @@ import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AppLogo } from '@/components/layout/AppLogo';
 import { ThemeToggle } from '@/components/layout/ThemeToggle';
-import { DocumentStatusBadge } from '@/components/document/DocumentStatusBadge';
-import {
-  getDocumentFailureMessage,
-  getDocumentStatusSummary,
-} from '@/lib/document';
-import { formatDate, formatFileSize } from '@/lib/format';
+import { DocumentListItem } from '@/components/document/DocumentListItem';
+import { formatFileSize } from '@/lib/format';
 import {
   Card,
   CardContent,
@@ -331,7 +324,6 @@ export const DashboardPage = () => {
         {documentsQuery.data && documentsQuery.data.documents.length > 0 && (
           <div className="grid gap-3">
             {documentsQuery.data.documents.map((document) => {
-              const isReady = document.status === 'ready';
               const isRetryingDocument =
                 retryMutation.isPending &&
                 retryMutation.variables === document._id;
@@ -339,87 +331,15 @@ export const DashboardPage = () => {
                 deleteMutation.isPending &&
                 deleteMutation.variables === document._id;
 
-              const documentContent = (
-                <>
-                  <CardHeader className="flex flex-row items-center justify-between gap-4">
-                    <div className="min-w-0">
-                      <CardTitle className="truncate text-base">
-                        {document.title}
-                      </CardTitle>
-                      <p className="mt-1 truncate text-sm text-muted-foreground">
-                        {document.fileName}
-                      </p>
-                    </div>
-
-                    <DocumentStatusBadge status={document.status} />
-                  </CardHeader>
-
-                  <CardContent className="flex items-center justify-between text-sm text-muted-foreground">
-                    <div className="min-w-0">
-                      <p>
-                        {getDocumentStatusSummary(document)}
-                      </p>
-                      {document.status === 'failed' && document.processingError && (
-                        <p className="mt-1 truncate text-xs text-destructive">
-                          {getDocumentFailureMessage(document)}
-                        </p>
-                      )}
-                    </div>
-                    <span>
-                      {formatDate(document.createdAt)}
-                    </span>
-                  </CardContent>
-                </>
-              );
-
               return (
-                <Card
+                <DocumentListItem
                   key={document._id}
-                  className="flex border bg-card shadow-sm transition hover:bg-accent"
-                >
-                  {isReady ? (
-                    <Link
-                      to={`/documents/${document._id}`}
-                      className="block min-w-0 flex-1"
-                    >
-                      {documentContent}
-                    </Link>
-                  ) : (
-                    <div className="block min-w-0 flex-1">
-                      {documentContent}
-                    </div>
-                  )}
-
-                  <div className="mr-3 mt-3 flex gap-1">
-                    {document.status === 'failed' && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="text-muted-foreground hover:text-foreground"
-                        onClick={() => handleRetryDocument(document._id)}
-                        disabled={isRetryingDocument || isDeletingDocument}
-                      >
-                        <RotateCcw
-                          className={`h-4 w-4 ${
-                            isRetryingDocument ? 'animate-spin' : ''
-                          }`}
-                        />
-                      </Button>
-                    )}
-
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="text-muted-foreground hover:text-destructive"
-                      onClick={() => handleDeleteDocument(document._id)}
-                      disabled={isDeletingDocument || isRetryingDocument}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </Card>
+                  document={document}
+                  isRetrying={isRetryingDocument}
+                  isDeleting={isDeletingDocument}
+                  onRetry={handleRetryDocument}
+                  onDelete={handleDeleteDocument}
+                />
               );
             })}
           </div>
