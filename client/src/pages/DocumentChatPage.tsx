@@ -33,7 +33,7 @@ import {
 } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ChatMessageBubble } from '@/components/chat/ChatMessageBubble';
-import { MessageContent } from '@/components/chat/MessageContent';
+import { PendingUserMessage } from '@/components/chat/PendingUserMessage';
 import { ThinkingMessage } from '@/components/chat/ThinkingMessage';
 import { copyToClipboard } from '@/lib/clipboard';
 import {
@@ -488,17 +488,7 @@ export const DocumentChatPage = () => {
                 })}
 
                 {pendingUserMessage && (
-                  <div className="flex justify-end">
-                    <div className="max-w-[88%] rounded-lg border bg-primary p-4 text-primary-foreground">
-                      <div className="mb-2 text-xs font-medium uppercase text-primary-foreground/70">
-                        user
-                      </div>
-                      <MessageContent
-                        text={pendingUserMessage}
-                        enabled={false}
-                      />
-                    </div>
-                  </div>
+                  <PendingUserMessage content={pendingUserMessage} />
                 )}
 
                 {askQuestionMutation.isPending && <ThinkingMessage />}
