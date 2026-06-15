@@ -32,6 +32,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ChatEmptyState } from '@/components/chat/ChatEmptyState';
 import { ChatMessageBubble } from '@/components/chat/ChatMessageBubble';
 import { PendingUserMessage } from '@/components/chat/PendingUserMessage';
 import { ThinkingMessage } from '@/components/chat/ThinkingMessage';
@@ -424,16 +425,10 @@ export const DocumentChatPage = () => {
                 )}
 
                 {!activeChatId && !pendingUserMessage && (
-                  <div className="flex min-h-[360px] flex-col items-center justify-center rounded-md border bg-background p-6 text-center">
-                    <MessageSquare className="mb-3 h-8 w-8 text-muted-foreground" />
-                    <h2 className="text-base font-medium text-foreground">
-                      Ask a question about this document
-                    </h2>
-                    <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-                      Type below to start a new chat, or create one from the
-                      chat list.
-                    </p>
-                  </div>
+                  <ChatEmptyState
+                    title="Ask a question about this document"
+                    description="Type below to start a new chat, or create one from the chat list."
+                  />
                 )}
 
                 {messagesQuery.isLoading && hasSelectedChat && (
@@ -441,29 +436,12 @@ export const DocumentChatPage = () => {
                 )}
 
                 {showEmptyChat && (
-                  <div className="flex min-h-[360px] flex-col items-center justify-center rounded-md border bg-background p-6 text-center">
-                    <MessageSquare className="mb-3 h-8 w-8 text-muted-foreground" />
-                    <h2 className="text-base font-medium text-foreground">
-                      Ask your first question
-                    </h2>
-                    <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-                      The assistant will answer only from the document context and
-                      show the source snippets it used.
-                    </p>
-                    <div className="mt-4 flex flex-wrap justify-center gap-2">
-                      {SUGGESTED_QUESTIONS.map((question) => (
-                        <Button
-                          key={question}
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setMessage(question)}
-                        >
-                          {question}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
+                  <ChatEmptyState
+                    title="Ask your first question"
+                    description="The assistant will answer only from the document context and show the source snippets it used."
+                    suggestedQuestions={SUGGESTED_QUESTIONS}
+                    onSelectQuestion={setMessage}
+                  />
                 )}
 
                 {messages.map((chatMessage) => {
