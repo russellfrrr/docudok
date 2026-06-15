@@ -43,13 +43,7 @@ import {
 import { formatDate, formatNumber } from '@/lib/format';
 import { formatSourceScore, getSourceScoreLabel } from '@/lib/source-score';
 import { countWords } from '@/lib/text-stats';
-
-const SUGGESTED_QUESTIONS = [
-  'Summarize this document.',
-  'What are the most important details?',
-  'What should I review carefully?',
-];
-const MAX_MESSAGE_LENGTH = 2000;
+import { MAX_MESSAGE_LENGTH, SUGGESTED_QUESTIONS } from '@/constants/chat';
 
 export const DocumentChatPage = () => {
   const { documentId } = useParams();
