@@ -5,9 +5,14 @@ interface RerankedSource extends SearchResult {
   rerankScore?: number;
 }
 
+const extractJsonArrayText = (text: string): string => {
+  const arrayMatch = text.match(/\[[\s\S]*\]/);
+  return arrayMatch ? arrayMatch[0] : text;
+};
+
 const parseRerankIndexes = (text: string): number[] => {
   try {
-    const parsed = JSON.parse(text);
+    const parsed = JSON.parse(extractJsonArrayText(text));
 
     if (!Array.isArray(parsed)) {
       return [];
@@ -37,7 +42,8 @@ export const rerankSources = async (
         `Chunk: ${source.chunkIndex}`,
         `Text: ${source.chunkText}`,
       ].join('\n');
-    }).join('\n\n');
+    })
+    .join('\n\n');
 
   const response = await openai.chat.completions.create({
     model: process.env.CHAT_MODEL || 'gpt-4o-mini',
@@ -57,9 +63,9 @@ export const rerankSources = async (
           '',
           `Return the best ${limit} indexes as JSON, like [2,0,4].`,
         ].join('\n'),
-      }
-    ]
-  })
+      },
+    ],
+  });
 
   const text = response.choices[0].message.content || '[]';
   const indexes = parseRerankIndexes(text);
@@ -80,11 +86,11 @@ export const rerankSources = async (
         rerankScore: Number((1 - position / Math.max(limit, 1)).toFixed(3)),
       };
     });
-  
+
   const missingSources = sources.filter((_, index) => {
     return !seen.has(index);
   });
 
   return [...reranked, ...missingSources].slice(0, limit);
-}
+};
 
