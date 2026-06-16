@@ -198,6 +198,7 @@ MONGO_URI=mongodb://localhost:27017/docudok
 JWT_SECRET=your_jwt_secret
 AUTH_RATE_LIMIT_WINDOW_MS=900000
 AUTH_RATE_LIMIT_MAX_REQUESTS=20
+CHAT_MESSAGE_MAX_LENGTH=2000
 
 OPENAI_API_KEY=your_api_key
 OPENAI_BASE_URL=
@@ -218,6 +219,8 @@ RETRIEVAL_MIN_SOURCES=3
 RETRIEVAL_SOURCE_LIMIT=5
 RETRIEVAL_CANDIDATE_LIMIT=12
 RETRIEVAL_SCORE_CUTOFF=0.7
+RETRIEVAL_VECTOR_WEIGHT=0.75
+RETRIEVAL_KEYWORD_WEIGHT=0.25
 
 RERANKING_ENABLED=true
 RERANKING_CANDIDATE_LIMIT=15
@@ -293,6 +296,7 @@ POST /api/v1/chats
 GET  /api/v1/chats/:documentId
 GET  /api/v1/chats/:chatId/messages
 POST /api/v1/chats/:chatId/messages
+DELETE /api/v1/chats/:chatId
 ```
 
 ---
@@ -328,6 +332,7 @@ The frontend uses route-level code splitting, so page bundles are loaded only wh
 - Document titles are capped at 120 characters, and document questions are capped at 2,000 characters.
 - Set `RETRIEVAL_DEBUG=true` when you want to inspect candidate and selected chunk scores in the server logs.
 - Tune `RETRIEVAL_CANDIDATE_LIMIT` and `RETRIEVAL_SCORE_CUTOFF` when experimenting with retrieval quality.
+- Tune `RETRIEVAL_VECTOR_WEIGHT` and `RETRIEVAL_KEYWORD_WEIGHT` when comparing semantic similarity against exact keyword overlap.
 - Reranking retrieves more Qdrant candidates first, then asks the LLM to choose the best sources before answering.
 - Tune `RERANKING_CANDIDATE_LIMIT` and `RERANKING_SOURCE_LIMIT` when experimenting with reranked retrieval.
 - Tune `CHUNK_SIZE`, `CHUNK_OVERLAP`, and `CHUNK_MIN_LENGTH` when changing how documents are split.
