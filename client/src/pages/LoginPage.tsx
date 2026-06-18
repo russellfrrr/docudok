@@ -53,16 +53,16 @@ export const LoginPage = () => {
       description="Log in to continue working with your document workspace."
     >
 
-      <Card className="border bg-card shadow-sm">
-        <CardHeader className="space-y-1">
+      <Card className="border border-border/80 bg-card/95 shadow-xl shadow-black/5 dark:shadow-black/20">
+        <CardHeader className="space-y-1 pb-5">
           <CardTitle className="text-xl">Log in</CardTitle>
           <CardDescription>
             Continue to your document workspace.
           </CardDescription>
         </CardHeader>
 
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <CardContent className="pb-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {loginMutation.isError && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
@@ -94,7 +94,7 @@ export const LoginPage = () => {
 
             <Button
               type="submit"
-              className="w-full"
+              className="mt-1 w-full shadow-sm"
               disabled={loginMutation.isPending}
             >
               {loginMutation.isPending && (
