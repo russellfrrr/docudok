@@ -56,9 +56,11 @@ export const RegisterPage = () => {
     >
 
       <Card className="border border-border/80 bg-card/95 shadow-xl shadow-black/5 dark:shadow-black/20">
-        <CardHeader className="space-y-1 pb-5">
-          <CardTitle className="text-xl">Create account</CardTitle>
-          <CardDescription>
+        <CardHeader className="space-y-2 pb-5">
+          <CardTitle className="text-[1.35rem] tracking-tight">
+            Create account
+          </CardTitle>
+          <CardDescription className="leading-6">
             Start chatting with your documents.
           </CardDescription>
         </CardHeader>
@@ -72,7 +74,7 @@ export const RegisterPage = () => {
               </Alert>
             )}
 
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               <Label htmlFor="name">Name</Label>
               <Input
                 id="name"
@@ -82,7 +84,7 @@ export const RegisterPage = () => {
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
@@ -93,7 +95,7 @@ export const RegisterPage = () => {
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
@@ -116,7 +118,7 @@ export const RegisterPage = () => {
             </Button>
           </form>
 
-          <p className="mt-4 text-center text-sm text-muted-foreground">
+          <p className="mt-4 text-center text-[0.86rem] leading-6 text-muted-foreground">
             Already have an account?{' '}
             <Link to="/login" className="font-medium text-foreground underline">
               Log in

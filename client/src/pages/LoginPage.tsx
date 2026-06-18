@@ -54,9 +54,9 @@ export const LoginPage = () => {
     >
 
       <Card className="border border-border/80 bg-card/95 shadow-xl shadow-black/5 dark:shadow-black/20">
-        <CardHeader className="space-y-1 pb-5">
-          <CardTitle className="text-xl">Log in</CardTitle>
-          <CardDescription>
+        <CardHeader className="space-y-2 pb-5">
+          <CardTitle className="text-[1.35rem] tracking-tight">Log in</CardTitle>
+          <CardDescription className="leading-6">
             Continue to your document workspace.
           </CardDescription>
         </CardHeader>
@@ -70,7 +70,7 @@ export const LoginPage = () => {
               </Alert>
             )}
 
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
@@ -81,7 +81,7 @@ export const LoginPage = () => {
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
@@ -104,7 +104,7 @@ export const LoginPage = () => {
             </Button>
           </form>
 
-          <p className="mt-4 text-center text-sm text-muted-foreground">
+          <p className="mt-4 text-center text-[0.86rem] leading-6 text-muted-foreground">
             No account yet?{' '}
             <Link to="/register" className="font-medium text-foreground underline">
               Create one

@@ -26,14 +26,14 @@ export const AuthLayout = ({
           <div className="space-y-10">
             <AppLogo />
 
-            <div className="space-y-3">
-              <div className="inline-flex rounded-full border border-sky-500/20 bg-sky-500/10 px-3 py-1 text-xs font-medium text-sky-700 dark:text-sky-300">
+            <div className="space-y-4">
+              <div className="inline-flex rounded-full border border-sky-500/20 bg-sky-500/10 px-3 py-1 font-mono text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-sky-700 dark:text-sky-300">
                 AI document workspace
               </div>
-              <h1 className="text-3xl font-semibold tracking-tight text-foreground">
+              <h1 className="text-[2.1rem] font-semibold leading-[1.06] tracking-tight text-foreground sm:text-[2.45rem]">
                 {title}
               </h1>
-              <p className="max-w-sm text-sm leading-6 text-muted-foreground">
+              <p className="max-w-sm text-[0.95rem] leading-7 text-muted-foreground">
                 {description}
               </p>
             </div>
@@ -41,7 +41,7 @@ export const AuthLayout = ({
 
           {children}
 
-          <div className="grid gap-3 text-sm text-muted-foreground">
+          <div className="grid gap-3 text-[0.86rem] leading-6 text-muted-foreground">
             {[
               'Source-backed answers',
               'Secure document workspace',
@@ -63,39 +63,39 @@ export const AuthLayout = ({
           <div className="relative w-full max-w-3xl">
             <div className="mb-8 max-w-2xl space-y-3">
               <div className="flex items-center gap-3">
-              <motion.div
+                <motion.div
                   className="relative flex size-10 items-center justify-center rounded-md border border-sky-500/20 bg-background text-sky-700 shadow-sm dark:text-sky-300"
-                animate={{
-                  opacity: [0.75, 1, 0.75],
-                }}
-                transition={{
-                  duration: 2.4,
-                  repeat: Infinity,
-                  ease: 'easeInOut',
-                }}
-              >
-                <motion.span
-                  className="absolute inset-0 rounded-md border border-primary/20"
                   animate={{
-                    scale: [1, 1.28, 1],
-                    opacity: [0, 0.5, 0],
+                    opacity: [0.75, 1, 0.75],
                   }}
                   transition={{
                     duration: 2.4,
                     repeat: Infinity,
                     ease: 'easeInOut',
                   }}
-                />
-                <Search className="relative size-4" />
-              </motion.div>
-                <div className="text-xs font-medium uppercase tracking-[0.16em] text-sky-700 dark:text-sky-300">
+                >
+                  <motion.span
+                    className="absolute inset-0 rounded-md border border-primary/20"
+                    animate={{
+                      scale: [1, 1.28, 1],
+                      opacity: [0, 0.5, 0],
+                    }}
+                    transition={{
+                      duration: 2.4,
+                      repeat: Infinity,
+                      ease: 'easeInOut',
+                    }}
+                  />
+                  <Search className="relative size-4" />
+                </motion.div>
+                <div className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-sky-700 dark:text-sky-300">
                   Retrieval preview
                 </div>
               </div>
-              <h2 className="text-4xl font-semibold tracking-tight text-foreground">
+              <h2 className="text-4xl font-semibold leading-[1.05] tracking-tight text-foreground xl:text-5xl">
                 Ask questions about any document
               </h2>
-              <p className="max-w-xl text-sm leading-6 text-muted-foreground">
+              <p className="max-w-xl text-[0.95rem] leading-7 text-muted-foreground">
                 Upload PDFs, contracts, reports, and manuals. Get
                 source-backed answers in seconds.
               </p>
@@ -151,22 +151,22 @@ export const AuthLayout = ({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.35 }}
                 >
-                  <div className="mb-3 flex items-center gap-2 text-xs font-medium text-sky-700 dark:text-sky-300">
+                  <div className="mb-3 flex items-center gap-2 font-mono text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-sky-700 dark:text-sky-300">
                     <MessageSquareText className="size-3.5" />
                     AI Answer
                   </div>
-                  <p className="text-sm leading-6 text-foreground">
+                  <p className="text-[0.93rem] leading-7 text-foreground">
                     The document indicates a renewal clause, payment terms, and
                     two sections that require review before signing.
                   </p>
                 </motion.div>
 
                 <div className="grid gap-2">
-                  <div className="text-xs font-medium text-muted-foreground">
+                  <div className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                     Sources
                   </div>
                   <motion.div
-                    className="cursor-pointer rounded-lg border bg-card p-4 text-xs leading-5 text-muted-foreground transition hover:border-sky-500/30 hover:bg-muted/40"
+                    className="cursor-pointer rounded-lg border bg-card p-4 text-[0.78rem] leading-6 text-muted-foreground transition hover:border-sky-500/30 hover:bg-muted/40"
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: 0.7 }}
@@ -175,7 +175,7 @@ export const AuthLayout = ({
                     written notice 30 days before expiration.
                   </motion.div>
                   <motion.div
-                    className="cursor-pointer rounded-lg border bg-card p-4 text-xs leading-5 text-muted-foreground transition hover:border-sky-500/30 hover:bg-muted/40"
+                    className="cursor-pointer rounded-lg border bg-card p-4 text-[0.78rem] leading-6 text-muted-foreground transition hover:border-sky-500/30 hover:bg-muted/40"
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: 0.9 }}
@@ -187,7 +187,7 @@ export const AuthLayout = ({
               </div>
             </div>
 
-            <div className="mt-6 grid grid-cols-3 gap-3 text-xs text-muted-foreground">
+            <div className="mt-6 grid grid-cols-3 gap-3 font-mono text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
               <div className="rounded-lg border bg-background/70 p-3">
                 Extract text
               </div>
