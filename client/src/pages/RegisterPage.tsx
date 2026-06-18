@@ -57,10 +57,10 @@ export const RegisterPage = () => {
 
       <Card className="border border-border/80 bg-card/95 shadow-xl shadow-black/5 dark:shadow-black/20">
         <CardHeader className="space-y-2 pb-5">
-          <CardTitle className="text-[1.35rem] tracking-tight">
+          <CardTitle className="font-heading text-[1.4rem] font-semibold tracking-[-0.015em]">
             Create account
           </CardTitle>
-          <CardDescription className="leading-6">
+          <CardDescription className="text-[0.9rem] leading-6">
             Start reviewing your documents.
           </CardDescription>
         </CardHeader>
@@ -75,7 +75,12 @@ export const RegisterPage = () => {
             )}
 
             <div className="space-y-2.5">
-              <Label htmlFor="name">Name</Label>
+              <Label
+                htmlFor="name"
+                className="text-[0.78rem] font-semibold tracking-[0.02em]"
+              >
+                Name
+              </Label>
               <Input
                 id="name"
                 value={name}
@@ -85,7 +90,12 @@ export const RegisterPage = () => {
             </div>
 
             <div className="space-y-2.5">
-              <Label htmlFor="email">Email</Label>
+              <Label
+                htmlFor="email"
+                className="text-[0.78rem] font-semibold tracking-[0.02em]"
+              >
+                Email
+              </Label>
               <Input
                 id="email"
                 type="email"
@@ -96,7 +106,12 @@ export const RegisterPage = () => {
             </div>
 
             <div className="space-y-2.5">
-              <Label htmlFor="password">Password</Label>
+              <Label
+                htmlFor="password"
+                className="text-[0.78rem] font-semibold tracking-[0.02em]"
+              >
+                Password
+              </Label>
               <Input
                 id="password"
                 type="password"
@@ -118,7 +133,7 @@ export const RegisterPage = () => {
             </Button>
           </form>
 
-          <p className="mt-4 text-center text-[0.86rem] leading-6 text-muted-foreground">
+          <p className="mt-4 text-center text-[0.84rem] leading-6 text-muted-foreground">
             Already have an account?{' '}
             <Link to="/login" className="font-medium text-foreground underline">
               Log in

@@ -137,6 +137,11 @@
   body {
     @apply min-h-screen bg-background text-foreground;
     margin: 0;
+    font-feature-settings:
+      "cv02" 1,
+      "cv03" 1,
+      "cv04" 1,
+      "ss01" 1;
   }
 
   button,
