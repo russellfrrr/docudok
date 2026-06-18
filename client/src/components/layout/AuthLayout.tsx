@@ -28,7 +28,7 @@ export const AuthLayout = ({
 
             <div className="space-y-4">
               <div className="inline-flex rounded-full border border-sky-500/20 bg-sky-500/10 px-3 py-1 font-mono text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-sky-700 dark:text-sky-300">
-                AI document workspace
+                Document workspace
               </div>
               <h1 className="text-[2.1rem] font-semibold leading-[1.06] tracking-tight text-foreground sm:text-[2.45rem]">
                 {title}
@@ -45,7 +45,7 @@ export const AuthLayout = ({
             {[
               'Source-backed answers',
               'Secure document workspace',
-              'Fast PDF analysis',
+              'Fast PDF review',
             ].map((feature) => (
               <div key={feature} className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-sky-600 dark:text-sky-300" />
@@ -89,7 +89,7 @@ export const AuthLayout = ({
                   <Search className="relative size-4" />
                 </motion.div>
                 <div className="font-mono text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-sky-700 dark:text-sky-300">
-                  Retrieval preview
+                  Document preview
                 </div>
               </div>
               <h2 className="text-4xl font-semibold leading-[1.05] tracking-tight text-foreground xl:text-5xl">
@@ -153,7 +153,7 @@ export const AuthLayout = ({
                 >
                   <div className="mb-3 flex items-center gap-2 font-mono text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-sky-700 dark:text-sky-300">
                     <MessageSquareText className="size-3.5" />
-                    AI Answer
+                    Answer
                   </div>
                   <p className="text-[0.93rem] leading-7 text-foreground">
                     The document indicates a renewal clause, payment terms, and
@@ -195,7 +195,7 @@ export const AuthLayout = ({
                 Find sources
               </div>
               <div className="rounded-lg border bg-background/70 p-3">
-                Answer safely
+                Review clearly
               </div>
             </div>
           </div>

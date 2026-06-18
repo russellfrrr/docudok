@@ -61,7 +61,7 @@ export const RegisterPage = () => {
             Create account
           </CardTitle>
           <CardDescription className="leading-6">
-            Start chatting with your documents.
+            Start reviewing your documents.
           </CardDescription>
         </CardHeader>
 
