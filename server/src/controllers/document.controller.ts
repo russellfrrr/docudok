@@ -1,4 +1,4 @@
-import fs from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth.middleware';
@@ -17,6 +17,30 @@ import {
 } from '../utils/document-validation';
 import { countWords } from '../utils/text-stats';
 
+const getUploadedFilePath = (fileName: string) => {
+  return path.join('uploads', fileName);
+};
+
+const fileExists = async (filePath: string) => {
+  try {
+    await fs.access(filePath);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const deleteFileIfExists = async (filePath: string) => {
+  try {
+    await fs.unlink(filePath);
+  } catch (err) {
+    const error = err as NodeJS.ErrnoException;
+
+    if (error.code !== 'ENOENT') {
+      throw err;
+    }
+  }
+};
 
 export const uploadDocument = async (req: AuthRequest, res: Response) => {
   try {
@@ -33,7 +57,7 @@ export const uploadDocument = async (req: AuthRequest, res: Response) => {
     }
 
     const title = validateDocumentTitle(req.body.title, req.file.originalname);
-    const filePath = path.join('uploads', req.file.filename);
+    const filePath = getUploadedFilePath(req.file.filename);
 
     const document = await DocumentModel.create({
       userId: req.user.id,
@@ -168,9 +192,9 @@ export const retryDocumentProcessing = async (req: AuthRequest, res: Response) =
       return res.status(400).json({ message: 'Document is already ready' });
     }
 
-    const filePath = path.join('uploads', document.fileName);
+    const filePath = getUploadedFilePath(document.fileName);
 
-    if (!fs.existsSync(filePath)) {
+    if (!(await fileExists(filePath))) {
       document.status = 'failed';
       document.processingError = 'Uploaded file not found';
       await document.save();
@@ -238,11 +262,8 @@ export const deleteDocument = async (req: AuthRequest, res: Response) => {
 
     await deleteDocumentVectors(req.user.id, document._id.toString());
 
-    const filePath = path.join('uploads', document.fileName);
-
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
+    const filePath = getUploadedFilePath(document.fileName);
+    await deleteFileIfExists(filePath);
 
     res.json({ message: 'Document deleted' });
   } catch (err) {
