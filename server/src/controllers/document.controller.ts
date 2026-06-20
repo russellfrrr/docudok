@@ -45,9 +45,7 @@ const deleteFileIfExists = async (filePath: string) => {
 export const uploadDocument = async (req: AuthRequest, res: Response) => {
   try {
     if (!req.user) {
-      return res.status(401).json({ 
-        message: 'Not authorized'
-      });
+      return res.status(401).json({ message: 'Not authorized' });
     }
 
     if (!req.file) {
@@ -83,9 +81,9 @@ export const uploadDocument = async (req: AuthRequest, res: Response) => {
     }
 
     console.error('Upload document failed', err);
-    res.status(500).json({ message: 'Upload document failed' });
+    return res.status(500).json({ message: 'Upload document failed' });
   }
-}
+};
 
 export const getDocuments = async (req: AuthRequest, res: Response) => {
   try {
@@ -93,14 +91,16 @@ export const getDocuments = async (req: AuthRequest, res: Response) => {
       return res.status(401).json({ message: 'Not authorized' });
     }
 
-    const documents = await DocumentModel.find({ userId: req.user.id }).sort({ createdAt: -1 });
+    const documents = await DocumentModel.find({ userId: req.user.id }).sort({
+      createdAt: -1,
+    });
 
-    res.json({ documents });
+    return res.json({ documents });
   } catch (err) {
     console.error('Get documents failed', err);
-    res.status(500).json({ message: 'Get documents failed '});
+    return res.status(500).json({ message: 'Get documents failed' });
   }
-}
+};
 
 export const getDocumentById = async (req: AuthRequest, res: Response) => {
   try {
@@ -117,12 +117,12 @@ export const getDocumentById = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ message: 'Document not found' });
     }
 
-    res.json({ document });
+    return res.json({ document });
   } catch (err) {
     console.error('Get document failed', err);
-    res.status(500).json({ message: 'Get document failed' });
+    return res.status(500).json({ message: 'Get document failed' });
   }
-}
+};
 
 export const getDocumentChunks = async (req: AuthRequest, res: Response) => {
   try {
@@ -162,12 +162,12 @@ export const getDocumentChunks = async (req: AuthRequest, res: Response) => {
         chunks.length > 0 ? Math.round(totalWords / chunks.length) : 0,
     };
 
-    res.json({ chunks, stats });
+    return res.json({ chunks, stats });
   } catch (err) {
     console.error('Get document chunks failed', err);
-    res.status(500).json({ message: 'Get document chunks failed' });
+    return res.status(500).json({ message: 'Get document chunks failed' });
   }
-}
+};
 
 export const retryDocumentProcessing = async (req: AuthRequest, res: Response) => {
   try {
@@ -215,12 +215,12 @@ export const retryDocumentProcessing = async (req: AuthRequest, res: Response) =
       console.error('Retry document processing failed', err);
     });
 
-    res.json({ document });
+    return res.json({ document });
   } catch (err) {
     console.error('Retry document processing failed', err);
-    res.status(500).json({ message: 'Retry document processing failed' });
+    return res.status(500).json({ message: 'Retry document processing failed' });
   }
-}
+};
 
 export const deleteDocument = async (req: AuthRequest, res: Response) => {
   try {
@@ -265,12 +265,12 @@ export const deleteDocument = async (req: AuthRequest, res: Response) => {
     const filePath = getUploadedFilePath(document.fileName);
     await deleteFileIfExists(filePath);
 
-    res.json({ message: 'Document deleted' });
+    return res.json({ message: 'Document deleted' });
   } catch (err) {
     console.error('Delete document failed', err);
-    res.status(500).json({ message: 'Delete document failed' });
+    return res.status(500).json({ message: 'Delete document failed' });
   }
-}
+};
 
 export const searchDocument = async (req: AuthRequest, res: Response) => {
   try {
@@ -287,7 +287,7 @@ export const searchDocument = async (req: AuthRequest, res: Response) => {
     });
 
     if (!document) {
-      return res.status(404).json({ message: 'Document not found or not ready '});
+      return res.status(404).json({ message: 'Document not found or not ready' });
     }
 
     const sources = await retrieveDocumentSources({
@@ -296,16 +296,16 @@ export const searchDocument = async (req: AuthRequest, res: Response) => {
       documentId: document._id.toString(),
     });
 
-    res.json({ sources });
+    return res.json({ sources });
   } catch (err) {
     if (err instanceof DocumentValidationError) {
       return res.status(400).json({ message: err.message });
     }
 
     console.error('Search document failed', err);
-    res.status(500).json({ message: 'Search document failed' });
+    return res.status(500).json({ message: 'Search document failed' });
   }
-}
+};
 
 export const askDocument = async (req: AuthRequest, res: Response) => {
   try {
@@ -333,13 +333,13 @@ export const askDocument = async (req: AuthRequest, res: Response) => {
 
     const answer = await generateAnswer(question, sources);
 
-    res.json({ answer, sources });
+    return res.json({ answer, sources });
   } catch (err) {
     if (err instanceof DocumentValidationError) {
       return res.status(400).json({ message: err.message });
     }
 
     console.error('Ask document failed', err);
-    res.status(500).json({ message: 'Ask document failed '});
+    return res.status(500).json({ message: 'Ask document failed' });
   }
-}
+};
