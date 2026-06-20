@@ -198,6 +198,7 @@ export const DashboardPage = () => {
             >
               <Input
                 placeholder="Document title optional"
+                aria-label="Document title"
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
               />
@@ -234,6 +235,7 @@ export const DashboardPage = () => {
                       type="button"
                       variant="outline"
                       onClick={() => fileInputRef.current?.click()}
+                      aria-label="Choose PDF file"
                     >
                       Choose file
                     </Button>
@@ -244,6 +246,7 @@ export const DashboardPage = () => {
                         variant="ghost"
                         size="icon"
                         onClick={clearSelectedFile}
+                        aria-label="Clear selected file"
                       >
                         <X className="h-4 w-4" />
                       </Button>

@@ -34,6 +34,7 @@ export const ChatComposer = ({
           value={message}
           onChange={(event) => onMessageChange(event.target.value)}
           placeholder="Ask a question about this document"
+          aria-label="Ask a question about this document"
           className="border-0 bg-transparent shadow-none focus-visible:ring-0"
           maxLength={MAX_MESSAGE_LENGTH + 1}
           disabled={disabled}

@@ -55,6 +55,7 @@ export const RetrievalTester = ({
             value={question}
             onChange={(event) => onQuestionChange(event.target.value)}
             placeholder="Example: What is this document about?"
+            aria-label="Retrieval test question"
             disabled={isPending || !documentIsReady}
           />
           <Button

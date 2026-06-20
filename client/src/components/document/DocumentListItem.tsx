@@ -78,6 +78,7 @@ export const DocumentListItem = ({
             className="text-muted-foreground hover:text-foreground"
             onClick={() => onRetry(document._id)}
             disabled={isRetrying || isDeleting}
+            aria-label={`Retry processing ${document.title}`}
           >
             <RotateCcw
               className={`h-4 w-4 ${isRetrying ? 'animate-spin' : ''}`}
@@ -92,6 +93,7 @@ export const DocumentListItem = ({
           className="text-muted-foreground hover:text-destructive"
           onClick={() => onDelete(document._id)}
           disabled={isDeleting || isRetrying}
+          aria-label={`Delete ${document.title}`}
         >
           <Trash2 className="h-4 w-4" />
         </Button>
