@@ -9,7 +9,6 @@ import {
   FileText,
   Loader2,
   Search,
-  Send,
 } from 'lucide-react';
 import { getDocumentById, searchDocument } from '@/services/document.service';
 import { createChat, deleteChat, sendMessage } from '@/services/chat.service';
@@ -29,6 +28,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ChatComposer } from '@/components/chat/ChatComposer';
 import { ChatEmptyState } from '@/components/chat/ChatEmptyState';
 import { ChatMessageBubble } from '@/components/chat/ChatMessageBubble';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
@@ -199,9 +199,7 @@ export const DocumentChatPage = () => {
     !hasMessages &&
     !messagesQuery.isLoading &&
     !pendingUserMessage;
-  const inputIsDisabled =
-    !documentIsReady || askQuestionMutation.isPending;
-  const messageIsTooLong = message.length > MAX_MESSAGE_LENGTH;
+  const inputIsDisabled = !documentIsReady || askQuestionMutation.isPending;
 
   const handleCopyText = async (copyId: string, text: string) => {
     await copyToClipboard(text);
@@ -414,45 +412,13 @@ export const DocumentChatPage = () => {
                 <div ref={messagesEndRef} />
               </div>
 
-              <div className="border-t bg-background/80 p-3 sm:p-4">
-                <form
-                  className="flex flex-col gap-3 rounded-lg border bg-card p-2 sm:flex-row"
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    askQuestionMutation.mutate(message.trim());
-                  }}
-                >
-                  <Input
-                    value={message}
-                    onChange={(event) => setMessage(event.target.value)}
-                    placeholder="Ask a question about this document"
-                    className="border-0 bg-transparent shadow-none focus-visible:ring-0"
-                    maxLength={MAX_MESSAGE_LENGTH + 1}
-                    disabled={inputIsDisabled}
-                  />
-
-                  <Button
-                    type="submit"
-                    className="sm:w-fit"
-                    disabled={inputIsDisabled || !message.trim() || messageIsTooLong}
-                  >
-                    {askQuestionMutation.isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Send className="h-4 w-4" />
-                    )}
-                    {askQuestionMutation.isPending ? 'Thinking...' : 'Send'}
-                  </Button>
-                </form>
-                <div
-                  className={`mt-2 text-right text-xs ${
-                    messageIsTooLong ? 'text-destructive' : 'text-muted-foreground'
-                  }`}
-                >
-                  {message.length}/{MAX_MESSAGE_LENGTH}
-                  {messageIsTooLong && ' - message is too long'}
-                </div>
-              </div>
+              <ChatComposer
+                message={message}
+                disabled={inputIsDisabled}
+                isSending={askQuestionMutation.isPending}
+                onMessageChange={setMessage}
+                onSubmit={() => askQuestionMutation.mutate(message.trim())}
+              />
             </CardContent>
             ) : (
               <CardContent className="flex-1 space-y-3 overflow-y-auto p-4 sm:p-6">
