@@ -37,7 +37,7 @@ export const ensureVectorCollection = async () => {
 
   await createPayloadIndexIfNeeded('userId');
   await createPayloadIndexIfNeeded('documentId');
-}
+};
 
 interface SaveVectorInput {
   id: string;
@@ -47,7 +47,7 @@ interface SaveVectorInput {
   chunkId: string;
   chunkText: string;
   chunkIndex: number;
-}
+};
 
 export interface SearchResult {
   chunkText: string;

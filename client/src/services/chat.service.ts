@@ -13,21 +13,21 @@ export const createChat = async (
 ): Promise<CreateChatResponse> => {
   const response = await api.post<CreateChatResponse>('/chats', input);
   return response.data;
-}
+};
 
 export const getChatsByDocument = async (
   documentId: string
 ): Promise<ChatsResponse> => {
   const response = await api.get<ChatsResponse>(`/chats/${documentId}`);
   return response.data;
-}
+};
 
 export const getMessagesByChat = async (
   chatId: string
 ): Promise<MessagesResponse> => {
   const response = await api.get<MessagesResponse>(`/chats/${chatId}/messages`);
   return response.data;
-}
+};
 
 export const deleteChat = async (chatId: string): Promise<void> => {
   await api.delete(`/chats/${chatId}`);
@@ -36,11 +36,12 @@ export const deleteChat = async (chatId: string): Promise<void> => {
 export const sendMessage = async (
   input: SendMessageInput
 ): Promise<SendMessageResponse> => {
-  const response = await api.post<SendMessageResponse>(`/chats/${input.chatId}/messages`, 
+  const response = await api.post<SendMessageResponse>(
+    `/chats/${input.chatId}/messages`,
     {
       content: input.content,
     }
   );
 
   return response.data;
-}
+};
