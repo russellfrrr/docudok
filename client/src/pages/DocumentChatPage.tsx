@@ -8,11 +8,8 @@ import {
   Copy,
   FileText,
   Loader2,
-  MessageSquare,
-  Plus,
   Search,
   Send,
-  Trash2,
 } from 'lucide-react';
 import { getDocumentById, searchDocument } from '@/services/document.service';
 import { createChat, deleteChat, sendMessage } from '@/services/chat.service';
@@ -34,6 +31,7 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ChatEmptyState } from '@/components/chat/ChatEmptyState';
 import { ChatMessageBubble } from '@/components/chat/ChatMessageBubble';
+import { ChatSidebar } from '@/components/chat/ChatSidebar';
 import { PendingUserMessage } from '@/components/chat/PendingUserMessage';
 import { ThinkingMessage } from '@/components/chat/ThinkingMessage';
 import { copyToClipboard } from '@/lib/clipboard';
@@ -282,104 +280,26 @@ export const DocumentChatPage = () => {
       </header>
 
       <section className="mx-auto grid max-w-6xl gap-6 px-4 py-8 lg:grid-cols-[280px_1fr]">
-        <aside className="space-y-4">
-          <Card className="border bg-card shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between gap-3">
-              <CardTitle className="text-base">Chats</CardTitle>
-
-              <Button
-                size="sm"
-                onClick={() => createChatMutation.mutate()}
-                disabled={!documentIsReady || createChatMutation.isPending}
-              >
-                {createChatMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Plus className="h-4 w-4" />
-                )}
-                New
-              </Button>
-            </CardHeader>
-
-            <CardContent className="space-y-2">
-              {!documentIsReady && (
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    Chat is available after the document is ready.
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              {chatsQuery.isLoading && (
-                <p className="text-sm text-muted-foreground">Loading chats...</p>
-              )}
-
-              {chats.length === 0 && !chatsQuery.isLoading && (
-                <p className="text-sm text-muted-foreground">
-                  No chats yet. Start a new one.
-                </p>
-              )}
-
-              {deleteChatMutation.isError && (
-                <Alert variant="destructive">
-                  <AlertDescription>
-                    {deleteChatMutation.error instanceof Error
-                      ? deleteChatMutation.error.message
-                      : 'Delete chat failed'}
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              {chats.map((chat) => {
-                const isSelected = activeChatId === chat._id;
-                const isDeleting =
-                  deleteChatMutation.isPending &&
-                  deleteChatMutation.variables === chat._id;
-
-                return (
-                  <div
-                    key={chat._id}
-                    className={`flex items-center gap-1 rounded-md border px-2 py-1 transition ${
-                      isSelected
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-background hover:bg-accent'
-                    }`}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setSelectedChatId(chat._id)}
-                      className="flex min-w-0 flex-1 items-center gap-2 px-1 py-1 text-left text-sm"
-                    >
-                      <MessageSquare className="h-4 w-4 shrink-0" />
-                      <span className="truncate">{chat.title}</span>
-                    </button>
-
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className={`h-7 w-7 shrink-0 ${
-                        isSelected
-                          ? 'text-primary-foreground/80 hover:bg-primary-foreground/10 hover:text-primary-foreground'
-                          : 'text-muted-foreground hover:text-destructive'
-                      }`}
-                      onClick={() => handleDeleteChat(chat._id)}
-                      disabled={isDeleting}
-                      aria-label={`Delete ${chat.title}`}
-                    >
-                      {isDeleting ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Trash2 className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                );
-              })}
-            </CardContent>
-          </Card>
-        </aside>
+        <ChatSidebar
+          chats={chats}
+          activeChatId={activeChatId}
+          documentIsReady={documentIsReady}
+          chatsAreLoading={chatsQuery.isLoading}
+          chatIsCreating={createChatMutation.isPending}
+          deleteErrorMessage={
+            deleteChatMutation.isError
+              ? deleteChatMutation.error instanceof Error
+                ? deleteChatMutation.error.message
+                : 'Delete chat failed'
+              : null
+          }
+          deletingChatId={
+            deleteChatMutation.isPending ? deleteChatMutation.variables : null
+          }
+          onCreateChat={() => createChatMutation.mutate()}
+          onSelectChat={setSelectedChatId}
+          onDeleteChat={handleDeleteChat}
+        />
 
         <div className="flex min-h-[620px] flex-col">
           <Card className="flex min-h-0 flex-1 flex-col border bg-card shadow-sm">
