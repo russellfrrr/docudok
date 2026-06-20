@@ -7,8 +7,6 @@ import {
   Check,
   Copy,
   FileText,
-  Loader2,
-  Search,
 } from 'lucide-react';
 import { getDocumentById, searchDocument } from '@/services/document.service';
 import { createChat, deleteChat, sendMessage } from '@/services/chat.service';
@@ -17,7 +15,6 @@ import { useDocumentChunks } from '@/hooks/useDocumentChunks';
 import { useMessages } from '@/hooks/useMessages';
 import type { Chat } from '@/types/chat';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { AppLogo } from '@/components/layout/AppLogo';
 import { ThemeToggle } from '@/components/layout/ThemeToggle';
 import { DocumentStatusBadge } from '@/components/document/DocumentStatusBadge';
@@ -33,6 +30,7 @@ import { ChatEmptyState } from '@/components/chat/ChatEmptyState';
 import { ChatMessageBubble } from '@/components/chat/ChatMessageBubble';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
 import { PendingUserMessage } from '@/components/chat/PendingUserMessage';
+import { RetrievalTester } from '@/components/chat/RetrievalTester';
 import { ThinkingMessage } from '@/components/chat/ThinkingMessage';
 import { copyToClipboard } from '@/lib/clipboard';
 import {
@@ -40,7 +38,6 @@ import {
   getDocumentStatusSummary,
 } from '@/lib/document';
 import { formatDate, formatNumber } from '@/lib/format';
-import { formatSourceScore, getSourceScoreLabel } from '@/lib/source-score';
 import { countWords } from '@/lib/text-stats';
 import { MAX_MESSAGE_LENGTH, SUGGESTED_QUESTIONS } from '@/constants/chat';
 
@@ -422,127 +419,23 @@ export const DocumentChatPage = () => {
             </CardContent>
             ) : (
               <CardContent className="flex-1 space-y-3 overflow-y-auto p-4 sm:p-6">
-                <form
-                  className="rounded-md border bg-background p-4"
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    searchMutation.mutate();
-                  }}
-                >
-                  <div className="mb-3">
-                    <h3 className="text-sm font-medium text-foreground">
-                      Test retrieval
-                    </h3>
-                    <p className="text-xs text-muted-foreground">
-                      Ask a question to see which source chunks the backend picks.
-                    </p>
-                  </div>
-
-                  <div className="flex flex-col gap-2 sm:flex-row">
-                    <Input
-                      value={debugQuestion}
-                      onChange={(event) => setDebugQuestion(event.target.value)}
-                      placeholder="Example: What is this document about?"
-                      disabled={searchMutation.isPending || !documentIsReady}
-                    />
-                    <Button
-                      type="submit"
-                      className="sm:w-fit"
-                      disabled={
-                        searchMutation.isPending ||
-                        !documentIsReady ||
-                        !debugQuestion.trim()
-                      }
-                    >
-                      {searchMutation.isPending ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Search className="h-4 w-4" />
-                      )}
-                      Test
-                    </Button>
-                    {(debugQuestion || searchMutation.data) && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="sm:w-fit"
-                        onClick={clearRetrievalTest}
-                      >
-                        Clear
-                      </Button>
-                    )}
-                  </div>
-                </form>
-
-                {searchMutation.isError && (
-                  <Alert variant="destructive">
-                    <AlertDescription>
-                      {searchMutation.error instanceof Error
-                        ? searchMutation.error.message
-                        : 'Search failed'}
-                    </AlertDescription>
-                  </Alert>
-                )}
-
-                {searchMutation.data && (
-                  <div className="space-y-2 rounded-md border bg-background p-4">
-                    <div className="text-sm font-medium text-foreground">
-                      Retrieved sources
-                    </div>
-
-                    {searchMutation.data.sources.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">
-                        No sources matched this question. Try rephrasing it or
-                        checking whether the document chunks contain the answer.
-                      </p>
-                    ) : (
-                      searchMutation.data.sources.map((source, index) => {
-                        const copyId = `retrieval-source-${source.chunkIndex}-${index}`;
-
-                        return (
-                          <div
-                            key={`${source.chunkIndex}-${source.score}`}
-                            className="rounded-md border bg-muted/50 p-3"
-                          >
-                            <div className="mb-1 flex items-center justify-between gap-2 text-xs text-muted-foreground">
-                              <span>
-                                Source {index + 1} - Chunk {source.chunkIndex} -
-                                {' '}
-                                {formatSourceScore(
-                                  source.score,
-                                  source.relevanceScore,
-                                  source.rerankScore,
-                                  source.keywordScore,
-                                  source.finalScore
-                                )}
-                                {' - '}
-                                {getSourceScoreLabel(source.relevanceScore)}
-                              </span>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() =>
-                                  handleCopyText(copyId, source.chunkText)
-                                }
-                              >
-                                {copiedTextId === copyId ? (
-                                  <Check className="h-4 w-4" />
-                                ) : (
-                                  <Copy className="h-4 w-4" />
-                                )}
-                                {copiedTextId === copyId ? 'Copied' : 'Copy'}
-                              </Button>
-                            </div>
-                            <p className="line-clamp-4 text-sm leading-6 text-muted-foreground">
-                              {source.chunkText}
-                            </p>
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
-                )}
+                <RetrievalTester
+                  question={debugQuestion}
+                  sources={searchMutation.data?.sources}
+                  isPending={searchMutation.isPending}
+                  isError={searchMutation.isError}
+                  errorMessage={
+                    searchMutation.error instanceof Error
+                      ? searchMutation.error.message
+                      : null
+                  }
+                  documentIsReady={documentIsReady}
+                  copiedTextId={copiedTextId}
+                  onQuestionChange={setDebugQuestion}
+                  onSubmit={() => searchMutation.mutate()}
+                  onClear={clearRetrievalTest}
+                  onCopyText={handleCopyText}
+                />
 
                 {chunksQuery.data && (
                   <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
