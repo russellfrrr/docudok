@@ -20,23 +20,41 @@ interface RetrievalDebugConfig {
   keywordScoreWeight: number;
 }
 
+const clampNumber = (value: number, min: number, max: number) => {
+  return Math.min(Math.max(value, min), max);
+};
+
+const getPositiveLimit = (name: string, fallback: number) => {
+  return Math.max(1, Math.floor(getNumberEnv(name, fallback)));
+};
+
 const getRetrievalConfig = () => {
-  const vectorScoreWeight = getNumberEnv('RETRIEVAL_VECTOR_WEIGHT', 0.75);
-  const keywordScoreWeight = getNumberEnv('RETRIEVAL_KEYWORD_WEIGHT', 0.25);
+  const vectorScoreWeight = Math.max(
+    0,
+    getNumberEnv('RETRIEVAL_VECTOR_WEIGHT', 0.75)
+  );
+  const keywordScoreWeight = Math.max(
+    0,
+    getNumberEnv('RETRIEVAL_KEYWORD_WEIGHT', 0.25)
+  );
   const totalHybridWeight = vectorScoreWeight + keywordScoreWeight;
 
   return {
-    minSourceCount: getNumberEnv('RETRIEVAL_MIN_SOURCES', 3),
-    sourceLimit: getNumberEnv('RETRIEVAL_SOURCE_LIMIT', 5),
-    candidateLimit: getNumberEnv('RETRIEVAL_CANDIDATE_LIMIT', 12),
-    relativeScoreCutoff: getNumberEnv('RETRIEVAL_SCORE_CUTOFF', 0.7),
+    minSourceCount: getPositiveLimit('RETRIEVAL_MIN_SOURCES', 3),
+    sourceLimit: getPositiveLimit('RETRIEVAL_SOURCE_LIMIT', 5),
+    candidateLimit: getPositiveLimit('RETRIEVAL_CANDIDATE_LIMIT', 12),
+    relativeScoreCutoff: clampNumber(
+      getNumberEnv('RETRIEVAL_SCORE_CUTOFF', 0.7),
+      0,
+      1
+    ),
     vectorScoreWeight:
       totalHybridWeight > 0 ? vectorScoreWeight / totalHybridWeight : 0.75,
     keywordScoreWeight:
       totalHybridWeight > 0 ? keywordScoreWeight / totalHybridWeight : 0.25,
     rerankingEnabled: process.env.RERANKING_ENABLED === 'true',
-    rerankingCandidateLimit: getNumberEnv('RERANKING_CANDIDATE_LIMIT', 15),
-    rerankingSourceLimit: getNumberEnv('RERANKING_SOURCE_LIMIT', 5),
+    rerankingCandidateLimit: getPositiveLimit('RERANKING_CANDIDATE_LIMIT', 15),
+    rerankingSourceLimit: getPositiveLimit('RERANKING_SOURCE_LIMIT', 5),
   };
 };
 
