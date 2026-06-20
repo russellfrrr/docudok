@@ -17,6 +17,7 @@ import type { Chat } from '@/types/chat';
 import { Button } from '@/components/ui/button';
 import { AppLogo } from '@/components/layout/AppLogo';
 import { ThemeToggle } from '@/components/layout/ThemeToggle';
+import { DocumentChunkStats } from '@/components/document/DocumentChunkStats';
 import { DocumentStatusBadge } from '@/components/document/DocumentStatusBadge';
 import {
   Card,
@@ -37,7 +38,7 @@ import {
   getDocumentFailureMessage,
   getDocumentStatusSummary,
 } from '@/lib/document';
-import { formatDate, formatNumber } from '@/lib/format';
+import { formatDate } from '@/lib/format';
 import { countWords } from '@/lib/text-stats';
 import { MAX_MESSAGE_LENGTH, SUGGESTED_QUESTIONS } from '@/constants/chat';
 
@@ -438,48 +439,7 @@ export const DocumentChatPage = () => {
                 />
 
                 {chunksQuery.data && (
-                  <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
-                    <div className="rounded-md border bg-background p-3">
-                      <div className="text-xs text-muted-foreground">
-                        Total chunks
-                      </div>
-                      <div className="text-lg font-semibold text-foreground">
-                        {formatNumber(chunksQuery.data.stats.totalChunks)}
-                      </div>
-                    </div>
-                    <div className="rounded-md border bg-background p-3">
-                      <div className="text-xs text-muted-foreground">
-                        Total characters
-                      </div>
-                      <div className="text-lg font-semibold text-foreground">
-                        {formatNumber(chunksQuery.data.stats.totalCharacters)}
-                      </div>
-                    </div>
-                    <div className="rounded-md border bg-background p-3">
-                      <div className="text-xs text-muted-foreground">
-                        Total words
-                      </div>
-                      <div className="text-lg font-semibold text-foreground">
-                        {formatNumber(chunksQuery.data.stats.totalWords)}
-                      </div>
-                    </div>
-                    <div className="rounded-md border bg-background p-3">
-                      <div className="text-xs text-muted-foreground">
-                        Avg. characters
-                      </div>
-                      <div className="text-lg font-semibold text-foreground">
-                        {formatNumber(chunksQuery.data.stats.averageChunkLength)}
-                      </div>
-                    </div>
-                    <div className="rounded-md border bg-background p-3">
-                      <div className="text-xs text-muted-foreground">
-                        Avg. words
-                      </div>
-                      <div className="text-lg font-semibold text-foreground">
-                        {formatNumber(chunksQuery.data.stats.averageChunkWords)}
-                      </div>
-                    </div>
-                  </div>
+                  <DocumentChunkStats stats={chunksQuery.data.stats} />
                 )}
 
                 {chunksQuery.isLoading && (
@@ -509,7 +469,7 @@ export const DocumentChatPage = () => {
                           Chunk {chunk.chunkIndex}
                         </span>
                         <span>{chunk.chunkText.length} characters</span>
-                        <span>{formatNumber(countWords(chunk.chunkText))} words</span>
+                        <span>{countWords(chunk.chunkText)} words</span>
                         <span>Saved {formatDate(chunk.createdAt)}</span>
                       </div>
                       <Button
