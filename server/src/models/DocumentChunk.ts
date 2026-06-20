@@ -29,7 +29,7 @@ const documentChunkSchema = new Schema<IDocumentChunk>({
   },
   createdAt: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
 });
 

@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document} from 'mongoose';
+import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IChat extends Document {
   userId: mongoose.Types.ObjectId;
@@ -28,6 +28,8 @@ const chatSchema = new Schema<IChat>({
     default: Date.now,
   },
 });
+
+chatSchema.index({ userId: 1, documentId: 1, createdAt: -1 });
 
 const ChatModel = mongoose.model<IChat>('Chat', chatSchema);
 

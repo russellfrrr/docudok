@@ -4,7 +4,7 @@ export interface IMessageSource {
   chunkText: string;
   chunkIndex: number;
   score: number;
-  keywordScore: number;
+  keywordScore?: number;
   finalScore?: number;
   relevanceScore?: number;
   rerankScore?: number;
@@ -36,7 +36,7 @@ const messageSourceSchema = new Schema<IMessageSource>(
       type: Number,
     },
     finalScore: {
-      type: Number
+      type: Number,
     },
     relevanceScore: {
       type: Number,
@@ -74,6 +74,8 @@ const messageSchema = new Schema<IMessage>({
     default: Date.now,
   },
 });
+
+messageSchema.index({ chatId: 1, createdAt: 1 });
 
 const MessageModel = mongoose.model<IMessage>('Message', messageSchema);
 
