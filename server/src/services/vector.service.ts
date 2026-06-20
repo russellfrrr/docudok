@@ -59,6 +59,18 @@ export interface SearchResult {
   rerankScore?: number;
 }
 
+const getPayloadString = (payload: Record<string, unknown>, key: string) => {
+  const value = payload[key];
+
+  return typeof value === 'string' ? value : '';
+};
+
+const getPayloadNumber = (payload: Record<string, unknown>, key: string) => {
+  const value = payload[key];
+
+  return typeof value === 'number' ? value : 0;
+};
+
 export const searchDocumentChunks = async (
   vector: number[],
   userId: string,
@@ -90,17 +102,21 @@ export const searchDocumentChunks = async (
   });
 
   return results.map((result) => {
-    const payload = result.payload || {};
+    const payload = (result.payload || {}) as Record<string, unknown>;
 
     return {
-      chunkText: String(payload.chunkText || ''),
-      chunkIndex: Number(payload.chunkIndex || 0),
+      chunkText: getPayloadString(payload, 'chunkText'),
+      chunkIndex: getPayloadNumber(payload, 'chunkIndex'),
       score: result.score,
     };
   });
-}
+};
 
 export const saveChunkVectors = async (items: SaveVectorInput[]) => {
+  if (items.length === 0) {
+    return;
+  }
+
   await ensureVectorCollection();
 
   await qdrant.upsert(collectionName, {
