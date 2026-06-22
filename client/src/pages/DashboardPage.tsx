@@ -1,12 +1,8 @@
 import {
-  AlertCircle,
-  CheckCircle2,
   FileText,
   LogOut,
   Loader2,
   RefreshCcw,
-  Upload,
-  X,
 } from 'lucide-react';
 import { useState, useRef } from 'react';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
@@ -18,18 +14,14 @@ import {
 import { useAuthStore } from '@/store/auth.store';
 import { useDocuments } from '@/hooks/useDocuments';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AppLogo } from '@/components/layout/AppLogo';
 import { ThemeToggle } from '@/components/layout/ThemeToggle';
 import { DocumentListItem } from '@/components/document/DocumentListItem';
-import { formatFileSize } from '@/lib/format';
+import { DocumentUploadCard } from '@/components/document/DocumentUploadCard';
 import { getPdfFileError } from '@/lib/upload';
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
 } from '@/components/ui/card';
 
 export const DashboardPage = () => {
@@ -178,116 +170,25 @@ export const DashboardPage = () => {
           </Button>
         </div>
 
-        <Card className="mb-6 border bg-card shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-base">Upload PDF</CardTitle>
-          </CardHeader>
-
-          <CardContent>
-            <form
-              className="grid gap-4"
-              onSubmit={(event) => {
-                event.preventDefault();
-                uploadMutation.mutate();
-              }}
-            >
-              <Input
-                placeholder="Document title optional"
-                aria-label="Document title"
-                value={title}
-                onChange={(event) => setTitle(event.target.value)}
-              />
-
-              <div className="rounded-lg border border-dashed bg-background p-5">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="application/pdf"
-                  className="hidden"
-                  onChange={handleFileChange}
-                />
-
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="flex size-10 items-center justify-center rounded-md border bg-muted">
-                      <FileText className="h-5 w-5 text-muted-foreground" />
-                    </div>
-
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-foreground">
-                        {selectedFile ? selectedFile.name : 'Choose a PDF document'}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {selectedFile
-                          ? `Ready to upload - ${formatFileSize(selectedFile.size)}`
-                          : 'PDF files only, up to 10MB'}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => fileInputRef.current?.click()}
-                      aria-label="Choose PDF file"
-                    >
-                      Choose file
-                    </Button>
-
-                    {selectedFile && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={clearSelectedFile}
-                        aria-label="Clear selected file"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <Button
-                type="submit"
-                className="w-fit"
-                disabled={!selectedFile || Boolean(fileError) || uploadMutation.isPending}
-              >
-                <Upload className="h-4 w-4" />
-                {uploadMutation.isPending ? 'Uploading...' : 'Upload document'}
-              </Button>
-            </form>
-
-            {fileError && (
-              <Alert variant="destructive" className="mt-4">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{fileError}</AlertDescription>
-              </Alert>
-            )}
-
-            {uploadMutation.isSuccess && (
-              <Alert className="mt-4">
-                <CheckCircle2 className="h-4 w-4" />
-                <AlertDescription>
-                  Document uploaded. It may take a moment to finish processing.
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {uploadMutation.isError && (
-              <Alert variant="destructive" className="mt-4">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  {uploadMutation.error instanceof Error
-                    ? uploadMutation.error.message
-                    : 'Upload failed'}
-                </AlertDescription>
-              </Alert>
-            )}
-          </CardContent>
-        </Card>
+        <DocumentUploadCard
+          title={title}
+          selectedFile={selectedFile}
+          fileError={fileError}
+          uploadIsPending={uploadMutation.isPending}
+          uploadIsSuccess={uploadMutation.isSuccess}
+          uploadErrorMessage={
+            uploadMutation.isError
+              ? uploadMutation.error instanceof Error
+                ? uploadMutation.error.message
+                : 'Upload failed'
+              : null
+          }
+          fileInputRef={fileInputRef}
+          onTitleChange={setTitle}
+          onFileChange={handleFileChange}
+          onClearFile={clearSelectedFile}
+          onSubmit={() => uploadMutation.mutate()}
+        />
 
         {documentsQuery.isLoading && (
           <Card className="border bg-card shadow-sm">
