@@ -2,6 +2,8 @@ import { getNumberEnv } from './env';
 
 const CHAT_MESSAGE_MAX_LENGTH = getNumberEnv('CHAT_MESSAGE_MAX_LENGTH', 2000);
 
+export const getChatMessageMaxLength = () => CHAT_MESSAGE_MAX_LENGTH;
+
 export const normalizeChatMessageContent = (content: unknown): string => {
   return String(content || '').trim();
 };

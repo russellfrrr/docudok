@@ -1,7 +1,9 @@
+import { getChatMessageMaxLength } from './chat-validation';
+
 export class DocumentValidationError extends Error {}
 
 export const maxDocumentTitleLength = 120;
-export const maxQuestionLength = 2000;
+export const maxQuestionLength = getChatMessageMaxLength();
 
 export const validateDocumentTitle = (
   title: unknown,
