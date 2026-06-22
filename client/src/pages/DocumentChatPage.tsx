@@ -1,12 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link, Navigate, useParams } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AlertCircle,
-  ArrowLeft,
   Check,
   Copy,
-  FileText,
 } from 'lucide-react';
 import { getDocumentById, searchDocument } from '@/services/document.service';
 import { createChat, deleteChat, sendMessage } from '@/services/chat.service';
@@ -15,10 +13,8 @@ import { useDocumentChunks } from '@/hooks/useDocumentChunks';
 import { useMessages } from '@/hooks/useMessages';
 import type { Chat } from '@/types/chat';
 import { Button } from '@/components/ui/button';
-import { AppLogo } from '@/components/layout/AppLogo';
-import { ThemeToggle } from '@/components/layout/ThemeToggle';
+import { DocumentChatHeader } from '@/components/document/DocumentChatHeader';
 import { DocumentChunkStats } from '@/components/document/DocumentChunkStats';
-import { DocumentStatusBadge } from '@/components/document/DocumentStatusBadge';
 import {
   Card,
   CardContent,
@@ -36,7 +32,6 @@ import { ThinkingMessage } from '@/components/chat/ThinkingMessage';
 import { copyToClipboard } from '@/lib/clipboard';
 import {
   getDocumentFailureMessage,
-  getDocumentStatusSummary,
 } from '@/lib/document';
 import { formatDate } from '@/lib/format';
 import { countWords } from '@/lib/text-stats';
@@ -235,45 +230,7 @@ export const DocumentChatPage = () => {
 
   return (
     <main className="min-h-screen bg-muted">
-      <header className="border-b bg-card">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4">
-          <AppLogo />
-
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/">
-                <ArrowLeft className="h-4 w-4" />
-                Back
-              </Link>
-            </Button>
-          </div>
-        </div>
-
-        <div className="mx-auto max-w-6xl px-4 pb-5">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div className="min-w-0">
-              <div className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
-                <FileText className="h-4 w-4" />
-                <span className="truncate">
-                  {document?.fileName || 'Loading document...'}
-                </span>
-              </div>
-              <h1 className="truncate text-2xl font-semibold text-foreground">
-                {document?.title || 'Document'}
-              </h1>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {document
-                  ? getDocumentStatusSummary(document)
-                  : 'Loading document details'}
-              </p>
-            </div>
-
-            <DocumentStatusBadge status={document?.status || 'loading'} />
-          </div>
-        </div>
-      </header>
+      <DocumentChatHeader document={document} />
 
       <section className="mx-auto grid max-w-6xl gap-6 px-4 py-8 lg:grid-cols-[280px_1fr]">
         <ChatSidebar
