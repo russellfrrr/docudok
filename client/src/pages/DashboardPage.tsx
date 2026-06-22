@@ -24,14 +24,13 @@ import { AppLogo } from '@/components/layout/AppLogo';
 import { ThemeToggle } from '@/components/layout/ThemeToggle';
 import { DocumentListItem } from '@/components/document/DocumentListItem';
 import { formatFileSize } from '@/lib/format';
+import { getPdfFileError } from '@/lib/upload';
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-
-const MAX_PDF_SIZE_BYTES = 10 * 1024 * 1024;
 
 export const DashboardPage = () => {
   const queryClient = useQueryClient();
@@ -115,15 +114,11 @@ export const DashboardPage = () => {
       return;
     }
 
-    if (file.type !== 'application/pdf') {
-      setSelectedFile(null);
-      setFileError('Only PDF files are allowed');
-      return;
-    }
+    const validationError = getPdfFileError(file);
 
-    if (file.size > MAX_PDF_SIZE_BYTES) {
+    if (validationError) {
       setSelectedFile(null);
-      setFileError('PDF file must be 10MB or smaller');
+      setFileError(validationError);
       return;
     }
 
