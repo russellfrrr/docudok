@@ -25,7 +25,7 @@ export const createChat = async (req: AuthRequest, res: Response) => {
     const document = await DocumentModel.findOne({
       _id: documentId,
       userId: req.user.id,
-      status: 'ready'
+      status: 'ready',
     });
 
     if (!document) {
@@ -38,12 +38,12 @@ export const createChat = async (req: AuthRequest, res: Response) => {
       title: title || document.title,
     });
 
-    res.status(201).json({ chat });
+    return res.status(201).json({ chat });
   } catch (err) {
     console.error('Create chat failed', err);
-    res.status(500).json({ message: 'Create chat failed' });
+    return res.status(500).json({ message: 'Create chat failed' });
   }
-}
+};
 
 export const getChatsByDocument = async (req: AuthRequest, res: Response) => {
   try {
@@ -56,12 +56,12 @@ export const getChatsByDocument = async (req: AuthRequest, res: Response) => {
       documentId: req.params.documentId,
     }).sort({ createdAt: -1 });
 
-    res.json({ chats });
+    return res.json({ chats });
   } catch (err) {
     console.error('Get chats failed', err);
-    res.status(500).json({ message: 'Get chats failed' });
+    return res.status(500).json({ message: 'Get chats failed' });
   }
-}
+};
 
 export const deleteChat = async (req: AuthRequest, res: Response) => {
   try {
@@ -81,10 +81,10 @@ export const deleteChat = async (req: AuthRequest, res: Response) => {
     // A chat owns its messages, so remove them when the chat is deleted.
     await MessageModel.deleteMany({ chatId: chat._id });
 
-    res.json({ message: 'Chat deleted' });
+    return res.json({ message: 'Chat deleted' });
   } catch (err) {
     console.error('Delete chat failed', err);
-    res.status(500).json({ message: 'Delete chat failed' });
+    return res.status(500).json({ message: 'Delete chat failed' });
   }
 };
 
@@ -142,10 +142,10 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
       sources,
     });
 
-    res.status(201).json({ userMessage, assistantMessage });
+    return res.status(201).json({ userMessage, assistantMessage });
   } catch (err) {
     console.error('Send message failed', err);
-    res.status(500).json({ message: 'Send message failed' });
+    return res.status(500).json({ message: 'Send message failed' });
   }
 };
 
@@ -168,9 +168,9 @@ export const getMessagesByChat = async (req: AuthRequest, res: Response) => {
       chatId: chat._id,
     }).sort({ createdAt: 1 });
 
-    res.json({ messages });
+    return res.json({ messages });
   } catch (err) {
     console.error('Get messages failed', err);
-    res.status(500).json({ message: 'Get messages failed' });
+    return res.status(500).json({ message: 'Get messages failed' });
   }
 };
