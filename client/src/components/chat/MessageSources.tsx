@@ -1,7 +1,7 @@
-import { Check, ChevronDown, Copy } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { SourceSnippet } from '@/types/document';
-import { formatSourceScore, getSourceScoreLabel } from '@/lib/source-score';
+import { SourceCard } from './SourceCard';
 
 interface MessageSourcesProps {
   messageId: string;
@@ -50,40 +50,14 @@ export const MessageSources = ({
             const copyId = `${messageId}-source-${source.chunkIndex}-${index}`;
 
             return (
-              <div
+              <SourceCard
                 key={`${messageId}-${source.chunkIndex}-${source.score}`}
-                className="rounded-md border bg-background/70 p-4"
-              >
-                <div className="mb-1 flex items-center justify-between gap-2 text-xs text-muted-foreground">
-                  <span>
-                    Source {index + 1} - Chunk {source.chunkIndex} -{' '}
-                    {formatSourceScore(
-                      source.score,
-                      source.relevanceScore,
-                      source.rerankScore,
-                      source.keywordScore,
-                      source.finalScore
-                    )}{' '}
-                    - {getSourceScoreLabel(source.relevanceScore)}
-                  </span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onCopyText(copyId, source.chunkText)}
-                  >
-                    {copiedTextId === copyId ? (
-                      <Check className="h-4 w-4" />
-                    ) : (
-                      <Copy className="h-4 w-4" />
-                    )}
-                    {copiedTextId === copyId ? 'Copied' : 'Copy'}
-                  </Button>
-                </div>
-                <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
-                  {source.chunkText}
-                </p>
-              </div>
+                source={source}
+                index={index}
+                copyId={copyId}
+                copiedTextId={copiedTextId}
+                onCopyText={onCopyText}
+              />
             );
           })}
         </div>
