@@ -14,7 +14,7 @@ import {
   DocumentValidationError,
   validateDocumentTitle,
   validateQuestion,
-} from '../utils/document-validation';
+} from '../utils/validation/document-validation';
 import { countWords } from '../utils/text-stats';
 
 const getUploadedFilePath = (fileName: string) => {

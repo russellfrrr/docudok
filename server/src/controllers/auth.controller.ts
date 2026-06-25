@@ -7,7 +7,7 @@ import {
   AuthValidationError,
   validateLoginInput,
   validateRegisterInput,
-} from '../utils/auth-validation';
+} from '../utils/validation/auth-validation';
 
 const createToken = (userId: string) => {
   const jwtSecret = process.env.JWT_SECRET;

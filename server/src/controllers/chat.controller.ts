@@ -8,7 +8,7 @@ import { retrieveDocumentSources } from '../services/retrieval.service';
 import {
   normalizeChatMessageContent,
   validateChatMessageContent,
-} from '../utils/chat-validation';
+} from '../utils/validation/chat-validation';
 
 export const createChat = async (req: AuthRequest, res: Response) => {
   try {

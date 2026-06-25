@@ -1,4 +1,4 @@
-import { getNumberEnv } from './env';
+import { getNumberEnv } from '../env';
 
 const CHAT_MESSAGE_MAX_LENGTH = getNumberEnv('CHAT_MESSAGE_MAX_LENGTH', 2000);
 
