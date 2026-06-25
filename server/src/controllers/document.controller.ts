@@ -8,7 +8,7 @@ import ChatModel from '../models/Chat';
 import MessageModel from '../models/Message';
 import { deleteDocumentVectors } from '../services/vector.service';
 import { generateAnswer } from '../services/ai/answer.service';
-import { processDocument } from '../services/document-processing.service';
+import { processDocument } from '../services/documents/document-processing.service';
 import { retrieveDocumentSources } from '../services/retrieval.service';
 import {
   DocumentValidationError,
