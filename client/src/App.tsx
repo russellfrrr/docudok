@@ -7,22 +7,22 @@ import { useThemeStore } from '@/store/theme.store';
 import { PageLoading } from '@/components/layout/PageLoading';
 
 const LoginPage = lazy(() =>
-  import('@/pages/LoginPage').then((module) => ({
+  import('@/pages/auth/LoginPage').then((module) => ({
     default: module.LoginPage,
   }))
 );
 const RegisterPage = lazy(() =>
-  import('@/pages/RegisterPage').then((module) => ({
+  import('@/pages/auth/RegisterPage').then((module) => ({
     default: module.RegisterPage,
   }))
 );
 const DashboardPage = lazy(() =>
-  import('@/pages/DashboardPage').then((module) => ({
+  import('@/pages/dashboard/DashboardPage').then((module) => ({
     default: module.DashboardPage,
   }))
 );
 const DocumentChatPage = lazy(() =>
-  import('@/pages/DocumentChatPage').then((module) => ({
+  import('@/pages/documents/DocumentChatPage').then((module) => ({
     default: module.DocumentChatPage,
   }))
 );
