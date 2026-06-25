@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getChatsByDocument } from '@/services/chat.service';
+import { getChatsByDocument } from '@/services';
 
 export const useChats = (documentId: string | undefined) => {
   return useQuery({

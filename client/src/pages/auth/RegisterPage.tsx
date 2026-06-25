@@ -3,7 +3,7 @@ import type { FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { AlertCircle, Loader2 } from 'lucide-react';
-import { register } from '@/services/auth.service';
+import { register } from '@/services';
 import { useAuthStore } from '@/store/auth.store';
 import {
   Alert,

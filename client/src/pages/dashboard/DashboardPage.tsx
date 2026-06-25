@@ -10,7 +10,7 @@ import {
   uploadDocument,
   deleteDocument,
   retryDocumentProcessing,
-} from '@/services/document.service';
+} from '@/services';
 import { useAuthStore } from '@/store/auth.store';
 import { useDocuments } from '@/hooks/useDocuments';
 import { AppLogo, ThemeToggle } from '@/components/layout';

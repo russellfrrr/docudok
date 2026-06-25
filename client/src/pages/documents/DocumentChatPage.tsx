@@ -2,8 +2,13 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertCircle } from 'lucide-react';
-import { getDocumentById, searchDocument } from '@/services/document.service';
-import { createChat, deleteChat, sendMessage } from '@/services/chat.service';
+import {
+  createChat,
+  deleteChat,
+  getDocumentById,
+  searchDocument,
+  sendMessage,
+} from '@/services';
 import { useChats } from '@/hooks/useChats';
 import { useDocumentChunks } from '@/hooks/useDocumentChunks';
 import { useMessages } from '@/hooks/useMessages';

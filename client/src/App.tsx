@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { getMe } from '@/services/auth.service';
+import { getMe } from '@/services';
 import { useAuthStore } from '@/store/auth.store';
 import { useThemeStore } from '@/store/theme.store';
 import { PageLoading } from '@/components/layout';

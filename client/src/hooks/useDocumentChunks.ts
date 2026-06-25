@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getDocumentChunks } from '@/services/document.service';
+import { getDocumentChunks } from '@/services';
 
 export const useDocumentChunks = (
   documentId: string | undefined,

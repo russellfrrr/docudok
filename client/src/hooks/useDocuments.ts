@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getDocuments } from '@/services/document.service';
+import { getDocuments } from '@/services';
 
 export const useDocuments = () => {
   return useQuery({
