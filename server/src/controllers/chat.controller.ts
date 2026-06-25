@@ -3,7 +3,7 @@ import { AuthRequest } from '../middleware/auth.middleware';
 import ChatModel from '../models/Chat';
 import MessageModel from '../models/Message';
 import DocumentModel from '../models/Document';
-import { generateAnswer } from '../services/ai.service';
+import { generateAnswer } from '../services/ai/answer.service';
 import { retrieveDocumentSources } from '../services/retrieval.service';
 import {
   normalizeChatMessageContent,

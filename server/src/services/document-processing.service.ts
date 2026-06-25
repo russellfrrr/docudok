@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import DocumentModel from '../models/Document';
 import DocumentChunkModel from '../models/DocumentChunk';
 import { extractTextFromPdf } from './pdf.service';
-import { createEmbedding } from './embedding.service';
+import { createEmbedding } from './ai/embedding.service';
 import { deleteDocumentVectors, saveChunkVectors } from './vector.service';
 import { cleanText, splitTextIntoChunks } from '../utils/text';
 import { getErrorMessage } from '../utils/error';

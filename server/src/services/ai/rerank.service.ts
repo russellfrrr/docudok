@@ -1,5 +1,5 @@
 import { openai } from './openai-client.service';
-import { SearchResult } from './vector.service';
+import { SearchResult } from '../vector.service';
 
 interface RerankedSource extends SearchResult {
   rerankScore?: number;

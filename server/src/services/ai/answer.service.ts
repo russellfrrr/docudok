@@ -1,4 +1,4 @@
-import { SearchResult } from './vector.service';
+import { SearchResult } from '../vector.service';
 import { openai } from './openai-client.service';
 
 export const generateAnswer = async (

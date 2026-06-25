@@ -1,6 +1,6 @@
-import { createEmbedding } from './embedding.service';
+import { createEmbedding } from './ai/embedding.service';
 import { SearchResult, searchDocumentChunks } from './vector.service';
-import { rerankSources } from './rerank.service';
+import { rerankSources } from './ai/rerank.service';
 import { getNumberEnv } from '../utils/env';
 
 interface RetrieveDocumentSourcesInput {
