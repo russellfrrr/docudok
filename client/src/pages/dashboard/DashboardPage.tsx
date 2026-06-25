@@ -13,16 +13,10 @@ import {
 } from '@/services/document.service';
 import { useAuthStore } from '@/store/auth.store';
 import { useDocuments } from '@/hooks/useDocuments';
-import { Button } from '@/components/ui/button';
-import { AppLogo } from '@/components/layout/AppLogo';
-import { ThemeToggle } from '@/components/layout/ThemeToggle';
-import { DocumentListItem } from '@/components/document/DocumentListItem';
-import { DocumentUploadCard } from '@/components/document/DocumentUploadCard';
+import { AppLogo, ThemeToggle } from '@/components/layout';
+import { DocumentListItem, DocumentUploadCard } from '@/components/document';
 import { getPdfFileError } from '@/lib/upload';
-import {
-  Card,
-  CardContent,
-} from '@/components/ui/card';
+import { Button, Card, CardContent } from '@/components/ui';
 
 export const DashboardPage = () => {
   const queryClient = useQueryClient();

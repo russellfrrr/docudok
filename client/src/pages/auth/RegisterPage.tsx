@@ -5,18 +5,19 @@ import { useMutation } from '@tanstack/react-query';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { register } from '@/services/auth.service';
 import { useAuthStore } from '@/store/auth.store';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
+  Alert,
+  AlertDescription,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AuthLayout } from '@/components/layout/AuthLayout';
+  Input,
+  Label,
+} from '@/components/ui';
+import { AuthLayout } from '@/components/layout';
 
 export const RegisterPage = () => {
   const navigate = useNavigate();

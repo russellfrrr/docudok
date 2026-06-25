@@ -8,28 +8,31 @@ import { useChats } from '@/hooks/useChats';
 import { useDocumentChunks } from '@/hooks/useDocumentChunks';
 import { useMessages } from '@/hooks/useMessages';
 import type { Chat } from '@/types/chat';
-import { Button } from '@/components/ui/button';
-import { DocumentChatHeader } from '@/components/document/DocumentChatHeader';
-import { DocumentChunkList } from '@/components/document/DocumentChunkList';
-import { DocumentChunkStats } from '@/components/document/DocumentChunkStats';
 import {
+  DocumentChatHeader,
+  DocumentChunkList,
+  DocumentChunkStats,
+} from '@/components/document';
+import {
+  Alert,
+  AlertDescription,
+  Button,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ChatComposer } from '@/components/chat/ChatComposer';
-import { ChatEmptyState } from '@/components/chat/ChatEmptyState';
-import { ChatMessageBubble } from '@/components/chat/ChatMessageBubble';
-import { ChatSidebar } from '@/components/chat/ChatSidebar';
-import { PendingUserMessage } from '@/components/chat/PendingUserMessage';
-import { RetrievalTester } from '@/components/chat/RetrievalTester';
-import { ThinkingMessage } from '@/components/chat/ThinkingMessage';
-import { copyToClipboard } from '@/lib/clipboard';
+} from '@/components/ui';
 import {
-  getDocumentFailureMessage,
-} from '@/lib/document';
+  ChatComposer,
+  ChatEmptyState,
+  ChatMessageBubble,
+  ChatSidebar,
+  PendingUserMessage,
+  RetrievalTester,
+  ThinkingMessage,
+} from '@/components/chat';
+import { copyToClipboard } from '@/lib/clipboard';
+import { getDocumentFailureMessage } from '@/lib/document';
 import { MAX_MESSAGE_LENGTH, SUGGESTED_QUESTIONS } from '@/constants/chat';
 
 export const DocumentChatPage = () => {

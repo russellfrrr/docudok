@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getMe } from '@/services/auth.service';
 import { useAuthStore } from '@/store/auth.store';
 import { useThemeStore } from '@/store/theme.store';
-import { PageLoading } from '@/components/layout/PageLoading';
+import { PageLoading } from '@/components/layout';
 
 const LoginPage = lazy(() =>
   import('@/pages/auth/LoginPage').then((module) => ({
