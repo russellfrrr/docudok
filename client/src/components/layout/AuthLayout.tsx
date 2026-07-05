@@ -27,9 +27,6 @@ export const AuthLayout = ({
             <AppLogo />
 
             <div className="space-y-4">
-              <div className="inline-flex rounded-full border border-sky-500/20 bg-sky-500/10 px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-sky-700 dark:text-sky-300">
-                Document workspace
-              </div>
               <h1 className="font-heading text-[2.25rem] font-semibold leading-[1.02] tracking-[-0.02em] text-foreground sm:text-[2.65rem]">
                 {title}
               </h1>
@@ -88,9 +85,6 @@ export const AuthLayout = ({
                   />
                   <Search className="relative size-4" />
                 </motion.div>
-                <div className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-sky-700 dark:text-sky-300">
-                  Document preview
-                </div>
               </div>
               <h2 className="font-heading text-4xl font-semibold leading-[1.02] tracking-[-0.025em] text-foreground xl:text-5xl">
                 Ask questions about any document
